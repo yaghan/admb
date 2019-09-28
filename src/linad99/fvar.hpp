@@ -1298,23 +1298,22 @@ object is passed on the stack.
 */
 class prevariable
 {
+//jca
 protected:
 #ifndef __SUN__
   /**
   Default constructor
   */
-  prevariable()
-  {
-  }
+  prevariable(): v(nullptr) { }
 #endif
 #ifndef __NDPX__
-   prevariable(double_and_int * u)
-   {
-      v = u;
-   }
+   prevariable(double_and_int* u): v(u) { }
 #endif
-
 public:
+
+  prevariable(const prevariable& other): v(other.v) { }
+  ~prevariable() {}
+
   double_and_int* v; ///< pointer to the data
 
    friend class dvar_vector_iterator;
@@ -1410,8 +1409,14 @@ public:
       return v;
    }
 
-   prevariable & operator=(const prevariable &);
-   prevariable & operator=(double);
+  prevariable& operator=(const prevariable&);
+  prevariable(prevariable&& other): prevariable(other) {}
+  prevariable& operator=(prevariable&& other)
+  {
+    return operator=(other);
+  }
+
+   prevariable& operator=(const double);
 #if (__BORLANDC__  >= 0x0540)
    prevariable & operator=(const prevariable &) const;
    prevariable & operator=(double) const;
@@ -1514,24 +1519,32 @@ class df1_three_variable;
  */
 class dvariable:public prevariable
 {
+//jca
  public:
    dvariable();
    ~dvariable();
    dvariable(double t);
    dvariable(const int &t);
    dvariable(kkludge_object);
-   dvariable(const prevariable &);
-   dvariable & operator=(const prevariable &);
+   dvariable(const prevariable&);
+   dvariable(const dvariable&);
+   dvariable(dvariable&& other): dvariable(other) {}
+   dvariable(double_and_int*);
+   dvariable& operator=(const prevariable&);
+   dvariable& operator=(const dvariable&);
+   dvariable& operator=(dvariable&& other)
+   {
+     return operator=(other);
+   }
    dvariable & operator =(const df1_one_variable & v);
    dvariable & operator =(const df1_two_variable & v);
    dvariable & operator =(const df1_three_variable & v);
-   dvariable & operator=(double);
+   dvariable& operator=(const double);
 #if defined(USE_DDOUBLE)
 #  undef double
    dvariable & operator=(double);
 #  define double dd_real
 #endif
-   dvariable(const dvariable &);
 //#  if (__BORLANDC__  > 0x0520)
 //     dvariable& operator+=(const prevariable&);
 //#  endif

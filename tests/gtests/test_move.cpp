@@ -466,3 +466,96 @@ TEST_F(test_move, independents2x_async_gradcalc)
 
   ASSERT_DOUBLE_EQ(value(result), 0.5);
 }
+dvariable vec2()
+{
+  cout << gradient_structure::GRAD_STACK1->total() << endl;
+  dvar_vector vec(1, 3);
+  cout << gradient_structure::GRAD_STACK1->total() << endl;
+  cout << gradient_structure::ARR_LIST1->number_arr_links << endl;
+  return vec(2);
+}
+TEST_F(test_move, return_vec2)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  dvariable result;
+
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  result = vec2();
+
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(2, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+}
+TEST_F(test_move, return_vec2_null)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  dvariable result(nullptr);
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  result = vec2();
+
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(2, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+}
+dvariable var()
+{
+  dvariable var;
+  return var;
+}
+TEST_F(test_move, return_var)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  dvariable result;
+
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  result = var();
+
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+}
+TEST_F(test_move, return_var_null)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  dvariable result(nullptr);
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+
+  result = var();
+
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+}

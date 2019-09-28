@@ -62,26 +62,33 @@ prevariable& prevariable::operator=(const prevariable& t) const
   \param t constant reference to an object of type prevariable.
   \return prevariable reference
  */
+double_and_int* gradnew();
 prevariable& prevariable::operator=(const prevariable& t)
-    {
-      (*v).x=(*t.v).x;
-      gradient_structure::GRAD_STACK1->
-        set_gradient_stack1(default_evaluation1,&(v->x),&(t.v->x));
-      return(*this);
-    }
+{
+  if (v == nullptr)
+  {
+    v = gradnew();
+  }
 
+  (*v).x = (*t.v).x;
+  gradient_structure::GRAD_STACK1->set_gradient_stack1(default_evaluation1,&(v->x),&(t.v->x));
+  return *this;
+}
 /**
   Assigns a value to a dvariable object.
   \param t constant reference to an object of type prevariable.
   \return dvariable reference
  */
 dvariable& dvariable::operator=(const prevariable& t)
-    {
-      (*v).x=(*t.v).x;
-      gradient_structure::GRAD_STACK1->
-        set_gradient_stack1(default_evaluation1,&(v->x),&(t.v->x));
-      return(*this);
-    }
+{
+  prevariable::operator=(t);
+  return *this;
+}
+dvariable& dvariable::operator=(const dvariable& t)
+{
+  prevariable::operator=(t);
+  return *this;
+}
 
 /**
   Assigns a value to a dvariable object.
