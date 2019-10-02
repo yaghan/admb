@@ -436,6 +436,7 @@ TEST_F(test_move, independents2x_gradcalc)
 
   ASSERT_DOUBLE_EQ(value(result), 0.5);
 }
+/*
 TEST_F(test_move, independents2x_async_gradcalc)
 {
   independent_variables independents(1, 2);
@@ -466,6 +467,7 @@ TEST_F(test_move, independents2x_async_gradcalc)
 
   ASSERT_DOUBLE_EQ(value(result), 0.5);
 }
+*/
 dvariable vec2()
 {
   cout << gradient_structure::GRAD_STACK1->total() << endl;
@@ -510,8 +512,8 @@ TEST_F(test_move, return_vec2_null)
 
   result = vec2();
 
-  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
-  ASSERT_EQ(2, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->total());
   ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
 }
 dvariable var()
@@ -555,7 +557,163 @@ TEST_F(test_move, return_var_null)
 
   result = var();
 
-  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
-  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
   ASSERT_EQ(0, gradient_structure::ARR_LIST1->number_arr_links);
+}
+TEST_F(test_move, independents_gradcalc_with_null)
+{
+  independent_variables independents(1, 2);
+  independents(1) = 1.5;
+  independents(2) = 3.5;
+
+  gradient_structure gs;
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvar_vector variables(independents);
+
+  auto sum = [&variables]()
+  {
+    dvariable a(variables(1));
+    dvariable b(variables(2));
+    return a + b;
+  };
+
+  dvariable result(nullptr);
+  result = sum();
+  double v = value(result);
+
+  ASSERT_EQ(4, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.5);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 3.5);
+
+  dvector g(1, 2);
+  gradcalc(2, g);
+
+  ASSERT_DOUBLE_EQ(g(1), 1.0);
+  ASSERT_DOUBLE_EQ(g(2), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 1.0);
+}
+TEST_F(test_move, independents_gradcalc_with_nonull)
+{
+  independent_variables independents(1, 2);
+  independents(1) = 1.5;
+  independents(2) = 3.5;
+
+  gradient_structure gs;
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvar_vector variables(independents);
+
+  auto sum = [&variables]()
+  {
+    dvariable a(variables(1));
+    dvariable b(variables(2));
+    return a + b;
+  };
+
+  dvariable result;
+  result = sum();
+  double v = value(result);
+
+  ASSERT_EQ(4, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1753, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.5);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 3.5);
+
+  dvector g(1, 2);
+  gradcalc(2, g);
+
+  ASSERT_DOUBLE_EQ(g(1), 1.0);
+  ASSERT_DOUBLE_EQ(g(2), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 1.0);
+}
+TEST_F(test_move, independents_gradcalc_with_nonull_result)
+{
+  independent_variables independents(1, 2);
+  independents(1) = 1.5;
+  independents(2) = 3.5;
+
+  gradient_structure gs;
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvar_vector variables(independents);
+
+  auto sum = [&variables]()
+  {
+    dvariable result;
+    dvariable a(variables(1));
+    dvariable b(variables(2));
+    result = a + b;
+    return result;
+  };
+
+  dvariable result;
+  result = sum();
+  double v = value(result);
+
+  ASSERT_EQ(5, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1754, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.5);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 3.5);
+
+  dvector g(1, 2);
+  gradcalc(2, g);
+
+  ASSERT_DOUBLE_EQ(g(1), 1.0);
+  ASSERT_DOUBLE_EQ(g(2), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 1.0);
+}
+TEST_F(test_move, independents_gradcalc_with_nonull_move)
+{
+  independent_variables independents(1, 2);
+  independents(1) = 1.5;
+  independents(2) = 3.5;
+
+  gradient_structure gs;
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvar_vector variables(independents);
+
+  auto sum = [&variables]()
+  {
+    dvariable result;
+    dvariable a(variables(1));
+    dvariable b(variables(2));
+    result = a + b;
+    return std::move(result);
+  };
+
+  dvariable result;
+  result = sum();
+  double v = value(result);
+
+  ASSERT_EQ(5, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1754, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.5);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 3.5);
+
+  dvector g(1, 2);
+  gradcalc(2, g);
+
+  ASSERT_DOUBLE_EQ(g(1), 1.0);
+  ASSERT_DOUBLE_EQ(g(2), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 1.0);
 }

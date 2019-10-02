@@ -1410,10 +1410,15 @@ public:
    }
 
   prevariable& operator=(const prevariable&);
-  prevariable(prevariable&& other): prevariable(other) {}
+  prevariable(prevariable&& other): prevariable(other.v) { other.v = nullptr; }
   prevariable& operator=(prevariable&& other)
   {
-    return operator=(other);
+    if (v != nullptr)
+      { return operator=(other); }
+
+    v = other.v;
+    other.v = nullptr;
+    return *this;
   }
 
    prevariable& operator=(const double);
@@ -1528,13 +1533,18 @@ class dvariable:public prevariable
    dvariable(kkludge_object);
    dvariable(const prevariable&);
    dvariable(const dvariable&);
-   dvariable(dvariable&& other): dvariable(other) {}
+   dvariable(dvariable&& other): prevariable(other.v) { other.v = nullptr; }
    dvariable(double_and_int*);
    dvariable& operator=(const prevariable&);
    dvariable& operator=(const dvariable&);
    dvariable& operator=(dvariable&& other)
    {
-     return operator=(other);
+     if (v != nullptr)
+       { return operator=(other); }
+
+     v = other.v;
+     other.v = nullptr;
+     return *this;
    }
    dvariable & operator =(const df1_one_variable & v);
    dvariable & operator =(const df1_two_variable & v);
