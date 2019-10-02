@@ -717,3 +717,43 @@ TEST_F(test_move, independents_gradcalc_with_nonull_move)
   ASSERT_DOUBLE_EQ(value(variables(1)), 1.0);
   ASSERT_DOUBLE_EQ(value(variables(2)), 1.0);
 }
+TEST_F(test_move, independents_gradcalc_with_null_move)
+{
+  independent_variables independents(1, 2);
+  independents(1) = 1.5;
+  independents(2) = 3.5;
+
+  gradient_structure gs;
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvar_vector variables(independents);
+
+  auto sum = [&variables]()
+  {
+    dvariable result;
+    dvariable a(variables(1));
+    dvariable b(variables(2));
+    result = a + b;
+    return std::move(result);
+  };
+
+  dvariable result(nullptr);
+  result = sum();
+  double v = value(result);
+
+  ASSERT_EQ(4, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(1753, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.5);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 3.5);
+
+  dvector g(1, 2);
+  gradcalc(2, g);
+
+  ASSERT_DOUBLE_EQ(g(1), 1.0);
+  ASSERT_DOUBLE_EQ(g(2), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(1)), 1.0);
+  ASSERT_DOUBLE_EQ(value(variables(2)), 1.0);
+}
