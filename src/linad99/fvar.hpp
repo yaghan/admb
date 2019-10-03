@@ -1298,7 +1298,6 @@ object is passed on the stack.
 */
 class prevariable
 {
-//jca
 protected:
 #ifndef __SUN__
   /**
@@ -1413,11 +1412,14 @@ public:
   prevariable(prevariable&& other): prevariable(other.v) { other.v = nullptr; }
   prevariable& operator=(prevariable&& other)
   {
-    if (v != nullptr)
-      { return operator=(other); }
+    if (&other != this)
+    {
+      if (v != nullptr)
+        { return operator=(other); }
 
-    v = other.v;
-    other.v = nullptr;
+      v = other.v;
+      other.v = nullptr;
+    }
     return *this;
   }
 
@@ -1524,7 +1526,6 @@ class df1_three_variable;
  */
 class dvariable:public prevariable
 {
-//jca
  public:
    dvariable();
    ~dvariable();
@@ -1539,11 +1540,14 @@ class dvariable:public prevariable
    dvariable& operator=(const dvariable&);
    dvariable& operator=(dvariable&& other)
    {
-     if (v != nullptr)
-       { return operator=(other); }
+     if (&other != this)
+     {
+       if (v != nullptr)
+         { return operator=(other); }
 
-     v = other.v;
-     other.v = nullptr;
+       v = other.v;
+       other.v = nullptr;
+     }
      return *this;
    }
    dvariable & operator =(const df1_one_variable & v);
