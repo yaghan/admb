@@ -1868,7 +1868,7 @@ public:
   int repeatminflag;
   int mcmc2_flag;
   int robust_hybrid_flag;
-  int diagonal_metric_flag;
+  int diagonal_metric_flag = 0;
   long ifn;
   int maxfn;
   int iprint;
