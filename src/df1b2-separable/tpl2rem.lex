@@ -507,6 +507,35 @@ DATA_SECTION  {
       fprintf(fall,"%s","model_data::model_data(int argc,char * argv[]) : "
         "ad_comm(argc,argv)\n{\n");
     }
+    fprintf(fall, "%s", "  adstring tmpstring;\n"
+                        "  tmpstring=adprogram_name + adstring(\".dat\");\n"
+                        "  if (argc > 1)\n"
+                        "  {\n"
+                        "    int on=0;\n"
+                        "    if ( (on=option_match(argc,argv,\"-ind\"))>-1)\n"
+                        "    {\n"
+                        "      if (on>argc-2 || argv[on+1][0] == '-')\n"
+                        "      {\n"
+                        "        cerr << \"Invalid input data command line option\"\n"
+                        "                \" -- ignored\" << endl;\n"
+                        "      }\n"
+                        "      else\n"
+                        "      {\n"
+                        "        tmpstring = adstring(argv[on+1]);\n"
+                        "      }\n"
+                        "    }\n"
+                        "  }\n"
+                        "  global_datafile = new cifstream(tmpstring);\n"
+                        "  if (!global_datafile)\n"
+                        "  {\n"
+                        "    cerr << \"Error: Unable to allocate global_datafile in model_data constructor.\";\n"
+                        "    ad_exit(1);\n"
+                        "  }\n"
+                        "  if (!(*global_datafile))\n"
+                        "  {\n"
+                        "    delete global_datafile;\n"
+                        "    global_datafile=NULL;\n"
+                        "  }\n");
     fprintf(fdat,"%s","#define SEPFUN1\n");
     fprintf(fdat,"%s","#define SEPFUN3\n");
     fprintf(fdat,"%s","#define SEPFUN4\n");
@@ -3692,7 +3721,15 @@ PARAMETER_SECTION {
       exit(1);
     }
     if(!params_defined) BEGIN DEFINE_PARAMETERS;
-    in_define_data=0;
+    if (in_define_data)
+    {
+      fprintf(fall, "%s", "  if (global_datafile)\n"
+                          "  {\n"
+                          "    delete global_datafile;\n"
+                          "    global_datafile = NULL;\n"
+                          "  }\n");
+      in_define_data=0;
+    }
     in_define_parameters=1;
     params_defined=1;
 
@@ -3718,7 +3755,7 @@ PARAMETER_SECTION {
 //    fprintf(fdat,"%s","  void admaster_slave_variable_interface(void);\n");
     fprintf(fdat,"%s","  void preliminary_calculations(void);\n");
     fprintf(fdat,"%s","  void set_runtime(void);\n");
-    fprintf(fdat,"%s","  virtual void * mycast(void) {return (void*)this;}\n");
+//    fprintf(fdat,"%s","  virtual void * mycast(void) {return (void*)this;}\n");
 
     fprintf(fdat,"%s", "  static int mc_phase(void)\n"
       "  {\n    return initial_params::mc_phase;\n  }\n");
@@ -4685,6 +4722,10 @@ TOP_OF_MAIN_SECTION {
     fprintf(htop,"#include <admodel.h>\n");
     fprintf(htop,"#ifdef USE_ADMB_CONTRIBS\n");
     fprintf(htop,"#include <contrib.h>\n\n");
+    if(enable_pad)
+    {
+      fprintf(htop,"#include <gdbprintlib.cpp>\n");
+    }
     fprintf(htop,"#endif\n");
     if (random_effects_flag)
     {
@@ -4702,11 +4743,6 @@ TOP_OF_MAIN_SECTION {
     {
       fprintf(htop,"#include <adsplus.h>\n\n");
     }
-
-    if(enable_pad){
-      fprintf(htop,"#include <gdbprintlib.cpp>\n\n");
-    }
-
     if (makedll)
     {
       // make a definition file

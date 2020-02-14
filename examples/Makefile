@@ -1,10 +1,12 @@
-SHELL=cmd
-
 ADMB_HOME=..\\..\\..
 
+!IFDEF DEBUG
+OPTIONS=-g $(DEBUG_OPTION) $(FAST_OPTION)
+!ELSE
 OPTIONS=$(DEBUG_OPTION) $(FAST_OPTION)
+!ENDIF
 
-all: admb admb-re
+all: admb admb-re autodif
 
 admb:\
 buscycle \
@@ -40,12 +42,12 @@ finance:
 	pushd admb\\$@ & $@
 
 forest:
-	@REM pushd admb\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
-	@REM pushd admb\\$@ & $@
+	pushd admb\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
+	pushd admb\\$@ & $@
 
 pella_t:
-	@REM pushd admb\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
-	@REM pushd admb\\$@ & $@
+	pushd admb\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
+	pushd admb\\$@ & $@
 
 robreg: vonb vonbr
 vonb:
@@ -61,8 +63,8 @@ simple:
 	pushd admb\\$@ & $@
 
 truncreg:
-	@REM pushd admb\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
-	@REM pushd admb\\$@ & $@
+	pushd admb\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
+	pushd admb\\$@ & $@
 
 vol: n2mvol
 n2mvol:
@@ -130,8 +132,8 @@ logistic:
 	pushd admb-re\\$@ & $@
 
 nbmm:
-	@REM pushd admb-re\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
-	@REM pushd admb-re\\$@ & $@
+	pushd admb-re\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
+	pushd admb-re\\$@ & $@
 
 nested4:
 	pushd admb-re\\$@ & $(ADMB_HOME)\\admb $(OPTIONS) $@
@@ -190,6 +192,47 @@ binomial:
 binomial_w2:
 	pushd admb-re\\weights & $(ADMB_HOME)\\admb $(OPTIONS) $@
 	pushd admb-re\\weights & $@
+
+autodif: bigmin hemholtz io_examp normsim newt s1 autodif-simple simple2 simp1 struct oldstr
+
+bigmin:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
+
+hemholtz:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp hem_func.cpp && $(PROG) $@ && popd
+
+io_examp:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
+
+minimize:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp userfun.cpp && $(PROG) $@ && popd
+
+mixture:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp normaliz.cpp reset.cpp like.cpp savepar.cpp xinit.cpp nvarcal.cpp fcomp_m.cpp && $(PROG) $@ && popd
+
+normsim:
+	pushd autodif\\mixture && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
+
+newt:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
+
+s1:
+	pushd autodif\\simple && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
+
+autodif-simple:
+	pushd autodif\\simple && $(ADMB_HOME)\\admb $(OPTIONS) simple.cpp fcomp_s.cpp && $(PROG) simple && popd
+
+simple2:
+	pushd autodif\\simple && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp fcomp_s.cpp && $(PROG) $@ && popd
+
+simp1:
+	pushd autodif\\simple && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp fcomp_s.cpp && $(PROG) $@ && popd
+
+struct:
+	pushd autodif\\$@ && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
+
+oldstr:
+	pushd autodif\\struct && $(ADMB_HOME)\\admb $(OPTIONS) $@.cpp && $(PROG) $@ && popd
 
 clean:
 	del admb-re\\bcb\\admodel.cov

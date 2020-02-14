@@ -1,6 +1,12 @@
 ifeq ($(OS),Windows_NT)
-  ifeq ($(strip $(TERM)),)
-    SHELL=cmd
+  ifeq ($(SHELL),cmd)
+    CMDSHELL=cmd
+  else
+    ifneq ($(findstring bash.exe,$(shell where bash.exe 2>&1 | findstr bash.exe)),bash.exe)
+      CMDSHELL=cmd
+    endif
+  endif
+  ifeq ($(CMDSHELL),cmd)
     ifeq ($(wildcard ..\utilities\mingw\bin\g++.exe),..\utilities\mingw\bin\g++.exe)
       PATH:=$(shell cd)\..\utilities\mingw\bin;$(PATH)
     endif
@@ -15,61 +21,33 @@ ifeq ($(DEBUG),yes)
 DEBUG_OPTION=-g
 endif
 
-ifeq ($(SHELL),cmd)
-  ifneq ($(DEBUG),yes)
-    DIST=..\build\dist
-  else
-    DIST=..\build\debug
-  endif
-else
-  ifneq ($(DEBUG),yes)
-    DIST=../build/dist
-  else
-    DIST=../build/debug
-  endif
+DIST=../build/admb
+
+all:
+	$(MAKE) tests-core
+	$(MAKE) tests-contrib
+ifneq ($(TESTS_REMOTE),no)
+	$(MAKE) tests-remote
 endif
 
-ifeq ($(CXX),CC)
-all: all-tpls
-else
-all: all-gtests all-tpls
-endif
+tests-remote:
+	$(MAKE) remote-core-tpls
+	$(MAKE) remote-contrib-tpls
 
-coverage: all-gtests
-	$(MAKE) --directory=../contrib/gdbprintlib CONTRIB_INCLUDE=../../build/debug/include includes
+tests-core:
+	$(MAKE) unit-gtests
 	$(MAKE) --directory=../examples all
-	$(MAKE) tpl-f1b2vc5
-	$(MAKE) tpl-4darray
-	$(MAKE) tpl-glmmadmb
-	$(MAKE) tpl-betai
-	$(MAKE) tpl-beta2
-	$(MAKE) tpl-beta3
-	$(MAKE) tpl-vonmises
-	$(MAKE) tpl-tiny_ad_fe
-	$(MAKE) tpl-tinyfun
-	$(MAKE) tpl-poisp
-	$(MAKE) tpl-tiny_ad_re
-	$(MAKE) tpl-vectorize
-	$(MAKE) tpl-bessel
-	$(MAKE) tpl-qbeta
-	$(MAKE) tpl-dd2
-	$(MAKE) tpl-beta_deviate
-	$(MAKE) tpl-betareg
-	$(MAKE) tpl-beta_regression
-	$(MAKE) tpl-changepoint
-	$(MAKE) tpl-colfill
-	$(MAKE) tpl-cov_re
-	$(MAKE) tpl-expm
-	$(MAKE) tpl-gradients_output
-	$(MAKE) tpl-geolocation
-	$(MAKE) tpl-simple_mcmc
-	$(MAKE) tpl-hysimple
-	$(MAKE) tpl-testminmax
-	$(MAKE) tpl-orange_mvn
-	$(MAKE) tpl-lprof
-	$(MAKE) example-prof_like
+	$(MAKE) core-tpls
 
-all-gtests:
+tests-contrib:
+	$(MAKE) contrib-tpls
+
+coverage:
+	$(MAKE) unit-gtests
+	$(MAKE) --directory=../examples all
+	$(MAKE) core-tpls
+
+unit-gtests:
 ifneq ($(USE_GTESTS),no)
 	$(MAKE) --directory=gtests
 endif
@@ -77,12 +55,12 @@ endif
 test-rgamma:
 	$(MAKE) --directory=rgamma
 
-all-tpls:\
-  test-rgamma\
+core-tpls:\
+  tpl-dd2\
+  tpl-testminmax\
+  example-prof_like\
   tpl-f1b2vc5\
   tpl-4darray\
-  tpl-glmmadmb\
-  tpl-agemat\
   tpl-betai\
   tpl-beta2\
   tpl-beta3\
@@ -98,20 +76,30 @@ all-tpls:\
   tpl-beta_deviate\
   tpl-betareg\
   tpl-beta_regression\
-  tpl-changepoint\
   tpl-colfill\
   tpl-cov_re\
-  tpl-ctl\
   tpl-expm\
   tpl-gradients_output\
-  tpl-geolocation\
   tpl-simple_mcmc\
   tpl-hysimple\
-  tpl-priors\
   tpl-testminmax\
   tpl-orange_mvn\
   cpp-globals\
   tpl-lprof
+
+remote-core-tpls:\
+  tpl-geolocation\
+  tpl-changepoint\
+  tpl-geolocation\
+  tpl-glmmadmb
+
+contrib-tpls:\
+  tpl-priors\
+  test-rgamma\
+  tpl-ctl
+
+remote-contrib-tpls:\
+  tpl-agemat
 
 cpp-globals:
 	$(MAKE) --directory=globals
@@ -213,7 +201,7 @@ tpl-orange_mvn:
 	$(MAKE) --directory=orange_mvn
 
 tpl-lprof:
-ifneq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	$(MAKE) --directory=lprof
 endif
 
@@ -221,34 +209,34 @@ example-prof_like:
 	$(MAKE) --directory=../examples/admb/prof_like
 
 verify:
-ifeq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
   ifneq ($(DEBUG),yes)
-	del ..\benchmarks-saf.txt
-	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) -C ..\examples --file=Makefile all
-	pushd ..\build\dist & ..\..\scripts\get-outputs.bat > "..\..\benchmarks-saf.txt" & popd
+	del ..\outputs-saf.txt
+	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) -C ..\examples all
+	pushd .. & scripts\get-outputs.bat > outputs-saf.txt & popd
     ifndef SAFE_ONLY
-	del ..\benchmarks-opt.txt
-	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) FAST_OPTION=-f -C ..\examples --file=Makefile all
-	pushd ..\build\dist & ..\..\scripts\get-outputs.bat > "..\..\benchmarks-opt.txt" & popd
+	del ..\outputs-opt.txt
+	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) FAST_OPTION=-f -C ..\examples all
+	pushd .. & scripts\get-outputs.bat > outputs-opt.txt & popd
     endif
   else
     ifndef SAFE_ONLY
-	del ..\benchmarks-opt.txt
-	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) FAST_OPTION=-f -C ..\examples --file=Makefile all
-	pushd ..\build\debug & ..\..\scripts\get-outputs.bat > "..\..\benchmarks-opt.txt" & popd
+	del ..\outputs-opt.txt
+	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) FAST_OPTION=-f -C ..\examples all
+	pushd .. & scripts\get-outputs.bat > outputs-opt.txt & popd
     endif
-	del ..\benchmarks-saf.txt
-	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) -C ..\examples --file=Makefile all
-	pushd ..\build\debug & ..\..\scripts\get-outputs.bat > "..\..\benchmarks-saf.txt" & popd
+	del ..\outputs-saf.txt
+	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) -C ..\examples all
+	pushd .. & scripts\get-outputs.bat > outputs-saf.txt & popd
   endif
 else
-	rm -vf ../benchmarks-saf.txt
+	rm -vf ../outputs-saf.txt
 	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) -C ../examples all
-	-../scripts/get-outputs.sh ../examples/ > "../benchmarks-saf.txt"
+	-../scripts/get-outputs.sh ../examples/ > "../outputs-saf.txt"
   ifndef SAFE_ONLY
-	rm -vf ../benchmarks-opt.txt
+	rm -vf ../outputs-opt.txt
 	$(MAKE) DEBUG_OPTION=$(DEBUG_OPTION) FAST_OPTION=-f -C ../examples all
-	-../scripts/get-outputs.sh ../examples/ > "../benchmarks-opt.txt"
+	-../scripts/get-outputs.sh ../examples/ > "../outputs-opt.txt"
   endif
 endif
 
@@ -259,12 +247,37 @@ total-clean: clean
 	$(MAKE) --directory=agemat total-clean
 
 clean:
-ifeq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	@if exist SS3 rmdir /s /q SS3
+	@del dd2\\f1b2list1
+	@del dd2\\f1b2list12
+	@del dd2\\f1b2list13
+	@del dd2\\nf1b2list1
+	@del dd2\\nf1b2list12
+	@del dd2\\nf1b2list13
+	@del dualaveraging\\dualaveraging.cpp
+	@del dualaveraging\\dualaveraging.htp
+	@del dualaveraging\\dualaveraging.obj
+	@del dualaveraging\\hybmcmc.obj
+	@del f1b2vc5\\f1b2vc5.b01
+	@del f1b2vc5\\f1b2vc5.p01
 else
 	$(MAKE) --directory=lprof clean
 	@rm -rvf SS3
+	@rm -vf dd2/f1b2list1
+	@rm -vf dd2/f1b2list12
+	@rm -vf dd2/f1b2list13
+	@rm -vf dd2/nf1b2list1
+	@rm -vf dd2/nf1b2list12
+	@rm -vf dd2/nf1b2list13
+	@rm -vf dualaveraging/dualaveraging.cpp
+	@rm -vf dualaveraging/dualaveraging.htp
+	@rm -vf dualaveraging/dualaveraging.obj
+	@rm -vf dualaveraging/hybmcmc.obj
+	@rm -vf f1b2vc5/f1b2vc5.b01
+	@rm -vf f1b2vc5/f1b2vc5.p01
 endif
+	$(MAKE) --directory=rgamma clean
 	$(MAKE) --directory=globals clean
 	$(MAKE) --directory=f1b2vc5 clean
 	$(MAKE) --directory=expm clean
@@ -302,7 +315,7 @@ endif
 	$(MAKE) --directory=../examples/admb/prof_like clean
 
 dist-clean:
-ifeq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	del agemat/agemat.dat
 	del agemat/agemat.tpl
 	if exist geolocation/kfsst rd /S /Q geolocation/kfsst
@@ -329,7 +342,7 @@ else
 endif
 
 copy:
-ifeq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	if not exist $(DIST)\tests md $(DIST)\tests
 	xcopy ..\tests $(DIST)\tests /S /Y /D
 	$(MAKE) --directory=$(DIST)\tests total-clean
@@ -338,15 +351,15 @@ else
 	$(MAKE) --directory=$(DIST)/tests total-clean
 endif
 
-benchmarks:
-ifeq ($(SHELL),cmd)
-	del benchmarks-tests.txt
+outputs:
+ifeq ($(CMDSHELL),cmd)
+	del outputs-tests.txt
 else
-	rm -vf benchmarks-tests.txt
-	touch benchmarks-tests.txt
-	$(MAKE) --directory=lprof get-outputs >> benchmarks-tests.txt
+	rm -vf outputs-tests.txt
+	touch outputs-tests.txt
+	$(MAKE) --directory=lprof get-outputs >> outputs-tests.txt
 endif
-	$(MAKE) --directory=beta_regression get-outputs >> benchmarks-tests.txt
-	$(MAKE) --directory=agemat get-outputs >> benchmarks-tests.txt
-	$(MAKE) --directory=beta_deviate get-outputs >> benchmarks-tests.txt
-	$(MAKE) --directory=simple_mcmc get-outputs >> benchmarks-tests.txt
+	$(MAKE) --directory=beta_regression get-outputs >> outputs-tests.txt
+	$(MAKE) --directory=agemat get-outputs >> outputs-tests.txt
+	$(MAKE) --directory=beta_deviate get-outputs >> output-tests.txt
+	$(MAKE) --directory=simple_mcmc get-outputs >> output-tests.txt

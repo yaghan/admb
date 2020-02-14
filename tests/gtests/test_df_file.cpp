@@ -68,7 +68,6 @@ TEST_F(test_df_file, constructor_max)
     DF_FILE df_file(maxsize)
   );
 }
-#ifndef __MINGW32__
 TEST_F(test_df_file, constructor_max_limit)
 {
   ad_exit=&test_ad_exit;
@@ -86,10 +85,9 @@ TEST_F(test_df_file, constructor_max_limit)
     size_t maxsize = std::numeric_limits<size_t>::max();
 #endif
     maxsize -= sizeof(OFF_T);
-    DF_FILE df_file(maxsize)
+    DF_FILE df_file(maxsize + 1)
   );
 }
-#endif
 TEST_F(test_df_file, allocate_max)
 {
   size_t size = INT_MAX/2;

@@ -42,47 +42,48 @@ coverage:
 help:
 	@echo Read INSTALL.txt for installation help.
 
-installer:
-	rm -vf admb.zip build/admb
-	cd build && ln -sf dist/ admb
-	cd build && zip -9 -r ../admb admb
+installer: zip
+
+zip: $(CXX)-zip
 
 #Microsoft Visual C++
 cl: cl-all
 cl-all: 
-	nmake cl-dist
-	nmake cl-shared
-	pushd src& nmake copy
+	nmake /nologo cl-dist
+	nmake /nologo cl-shared
+	pushd src& nmake /nologo copy
 cl-dist: 
-	nmake cl-contribs
+	nmake /nologo cl-contribs
 cl-debug:
-	pushd src& nmake DEBUG=yes all
-	pushd contrib& nmake DEBUG=yes all
+	pushd src& nmake /nologo DEBUG=yes all
+	pushd contrib& nmake /nologo DEBUG=yes all
 cl-core:
-	pushd src& nmake all
+	pushd src& nmake /nologo all
 cl-contribs: cl-core
-	pushd contrib& nmake all
+	pushd contrib& nmake /nologo all
 cl-docs:
-	pushd docs& nmake all
+	pushd docs& nmake /nologo all
 cl-test:
-	pushd tests & nmake all
+	pushd tests & nmake /nologo all
 cl-gtests:
-	pushd tests & nmake test-gtests
+	pushd tests & nmake /nologo test-gtests
 cl-verify:
-	pushd tests& nmake verify
+	pushd tests& nmake /nologo verify
 cl-shared:
-	pushd src& nmake shared
-	pushd contrib& nmake shared
+	pushd src& nmake /nologo shared
+	pushd contrib& nmake /nologo shared
 cl-install:
-	pushd src& nmake install
+	pushd src& nmake /nologo install
 cl-check:
-	pushd src& nmake check
+	pushd src& nmake /nologo check
 cl-clean:
-	pushd src& nmake clean
-	pushd contrib& nmake clean
-	pushd scripts& nmake clean
-	pushd tests& nmake clean
-	pushd examples& nmake clean
+	pushd src& nmake /nologo clean
+	pushd contrib& nmake /nologo clean
+	pushd scripts& nmake /nologo clean
+	pushd tests& nmake /nologo clean
+	pushd examples& nmake /nologo clean
+cl-zip:
+	pushd src& nmake /nologo zip
 
 #GNU
 g++: g++-all
@@ -104,7 +105,7 @@ g++-docs:
 g++-test:
 	$(MAKE) --directory=tests CC=gcc CXX=g++ all
 g++-gtests:
-	$(MAKE) --directory=tests CC=gcc CXX=g++ all-gtests
+	$(MAKE) --directory=tests CC=gcc CXX=g++ unit-gtests
 g++-coverage:
 	$(MAKE) --directory=src CC=gcc CXX=g++ SAFE_ONLY=yes dist
 	$(MAKE) --directory=tests CC=gcc CXX=g++ coverage
@@ -123,6 +124,8 @@ g++-clean:
 	$(MAKE) --directory=scripts CC=gcc CXX=g++ clean
 	$(MAKE) --directory=tests CC=gcc CXX=g++ clean
 	$(MAKE) --directory=examples CC=gcc CXX=g++ clean
+g++-zip:
+	$(MAKE) --directory=src CC=gcc CXX=g++ zip
 
 #clang
 clang++: clang++-all
@@ -143,7 +146,7 @@ clang++-docs:
 clang++-test:
 	$(MAKE) --directory=tests CC=clang CXX=clang++ all
 clang++-gtests:
-	$(MAKE) --directory=tests CC=clang CXX=clang++ all-gtests
+	$(MAKE) --directory=tests CC=clang CXX=clang++ unit-gtests
 clang++-coverage:
 	$(MAKE) --directory=src CC=clang CXX=clang++ SAFE_ONLY=yes dist
 	$(MAKE) --directory=tests CC=clang CXX=clang++ coverage
@@ -162,6 +165,8 @@ clang++-clean:
 	$(MAKE) --directory=scripts CC=clang CXX=clang++ clean
 	$(MAKE) --directory=tests CC=clang CXX=clang++ clean
 	$(MAKE) --directory=examples CC=clang CXX=clang++ clean
+clang++-zip:
+	$(MAKE) --directory=src CC=clang CXX=clang++ zip
 
 #default c++
 c++: c++-all
@@ -185,7 +190,7 @@ c++-coverage:
 c++-test:
 	$(MAKE) --directory=tests CC=cc CXX=c++ all
 c++-gtests:
-	$(MAKE) --directory=tests CC=cc CXX=c++ all-gtests
+	$(MAKE) --directory=tests CC=cc CXX=c++ unit-gtests
 c++-verify:
 	$(MAKE) --directory=tests CC=cc CXX=c++ verify
 c++-shared:
@@ -201,6 +206,8 @@ c++-clean:
 	$(MAKE) --directory=scripts CC=cc CXX=c++ clean
 	$(MAKE) --directory=tests CC=cc CXX=c++ clean
 	$(MAKE) --directory=examples CC=cc CXX=c++ clean
+c++-zip:
+	$(MAKE) --directory=src CC=cc CXX=c++ zip
 
 #Oracle Solaris Studio
 CC: CC-all
@@ -221,7 +228,7 @@ CC-docs:
 CC-test:
 	$(MAKE) --directory=tests CC=cc CXX=CC all
 CC-gtests:
-	$(MAKE) --directory=tests CC=cc CXX=CC all-gtests
+	$(MAKE) --directory=tests CC=cc CXX=CC unit-gtests
 CC-verify:
 	$(MAKE) --directory=tests CC=cc CXX=CC verify
 CC-shared:
@@ -237,6 +244,8 @@ CC-clean:
 	$(MAKE) --directory=scripts CC=cc CXX=CC clean
 	$(MAKE) --directory=tests CC=cc CXX=CC clean
 	$(MAKE) --directory=examples CC=cc CXX=CC clean
+CC-zip:
+	$(MAKE) --directory=src CC=cc CXX=CC zip
 
 #Intel
 icpc: icpc-all
@@ -257,7 +266,7 @@ icpc-docs:
 icpc-test:
 	$(MAKE) --directory=tests CC=icc CXX=icpc all
 icpc-gtests:
-	$(MAKE) --directory=tests CC=icc CXX=icpc all-gtests
+	$(MAKE) --directory=tests CC=icc CXX=icpc unit-gtests
 icpc-verify:
 	$(MAKE) --directory=tests CC=icc CXX=icpc verify
 icpc-shared:
@@ -273,6 +282,8 @@ icpc-clean:
 	$(MAKE) --directory=scripts CC=icc CXX=icpc clean
 	$(MAKE) --directory=tests CC=icc CXX=icpc clean
 	$(MAKE) --directory=examples CC=icc CXX=icpc clean
+icpc-zip:
+	$(MAKE) --directory=src CC=icc CXX=icpc zip
 
 #AMD
 openCC: openCC-all
@@ -293,7 +304,7 @@ openCC-docs:
 openCC-test:
 	$(MAKE) --directory=tests CC=opencc CXX=openCC all
 openCC-gtests:
-	$(MAKE) --directory=tests CC=opencc CXX=openCC all-gtests
+	$(MAKE) --directory=tests CC=opencc CXX=openCC unit-gtests
 openCC-verify:
 	$(MAKE) --directory=tests CC=opencc CXX=openCC verify
 openCC-shared:
@@ -309,6 +320,8 @@ openCC-clean:
 	$(MAKE) --directory=scripts CC=opencc CXX=openCC clean
 	$(MAKE) --directory=tests CC=opencc CXX=openCC clean
 	$(MAKE) --directory=examples CC=opencc CXX=openCC clean
+openCC-zip:
+	$(MAKE) --directory=src CC=opencc CXX=openCC zip
 
 #scan-build
 analyze-c++: analyze-c++-all
@@ -332,7 +345,7 @@ analyze-c++-coverage:
 analyze-c++-test:
 	$(MAKE) --directory=tests CC=analyze-cc CXX=analyze-c++ all
 analyze-c++-gtests:
-	$(MAKE) --directory=tests CC=analyze-cc CXX=analyze-c++ all-gtests
+	$(MAKE) --directory=tests CC=analyze-cc CXX=analyze-c++ unit-gtests
 analyze-c++-verify:
 	$(MAKE) --directory=tests CC=analyze-cc CXX=analyze-c++ verify
 analyze-c++-shared:
@@ -348,6 +361,7 @@ analyze-c++-clean:
 	$(MAKE) --directory=scripts CC=analyze-cc CXX=analyze-c++ clean
 	$(MAKE) --directory=tests CC=analyze-cc CXX=analyze-c++ clean
 	$(MAKE) --directory=examples CC=analyze-cc CXX=analyze-c++ clean
+analyze-c++-zip:
 
 #Unsupported Borland 5.5
 bcc: bcc-all

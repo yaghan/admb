@@ -1,0 +1,48 @@
+name: windows-rtools35-64bit
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: [self-hosted, windows]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: clean
+      run: |
+        set PATH=C:\rtools35\mingw_64\bin;%PATH%
+        utilities\\make clean
+      shell: cmd
+    - name: build
+      run: |
+        set PATH=C:\rtools35\mingw_64\bin;%PATH%
+        utilities\\make -j 2
+        utilities\\make -j 2 shared
+      shell: cmd
+    - name: Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: admb_rtools35
+        path: build\\admb
+    - name: debug
+      run: |
+        set PATH=C:\rtools35\mingw_64\bin;%PATH%
+        utilities\\make -j 2 DEBUG=yes
+        utilities\\make -j 2 shared DEBUG=yes
+      shell: cmd
+    - name: Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: admb_rtools35_debug
+        path: build\\admb
+    - name: test
+      run: |
+        set PATH=C:\rtools35\mingw_64\bin;%PATH%
+        utilities\\make test DEBUG=yes TESTS_REMOTE=no
+      shell: cmd
+    - name: Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: outputs
+        path: outputs-opt.txt

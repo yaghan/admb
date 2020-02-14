@@ -1,59 +1,65 @@
-.ONESHELL:
-ifeq ($(TERM),cygwin)
-EXT=.cmd
-else
-ifeq (sh.exe,$(findstring sh.exe,$(SHELL)))
-SHELL = cmd
-endif
 ifeq ($(OS),Windows_NT)
-EXT=.sh
-endif
-endif
-
-ifeq ($(SHELL),cmd)
-  ifeq ($(SAFE_ONLY),yes)
-all: $(addprefix $(CONTRIB_OBJS_DIR)-saflp-, $(OBJECTS))
+  ifeq ($(SHELL),cmd)
+    CMDSHELL=cmd
   else
-all: $(addprefix $(CONTRIB_OBJS_DIR)-saflp-, $(OBJECTS)) $(addprefix $(CONTRIB_OBJS_DIR)-optlp-, $(OBJECTS))
+    ifeq ($(findstring bash.exe,$(shell where bash.exe 2>&1 | findstr bash.exe)),bash.exe)
+      EXT=.sh
+    else
+      CMDSHELL=cmd
+    endif
   endif
+endif
 
-$(CONTRIB_OBJS_DIR)-saflp-%.obj: %.cpp
-	..\..\admb -c $(OPTION) $<
-	copy $(basename $<).obj $@
+ifndef CONTRIB_OBJS_DIR
+CONTRIB_OBJS_DIR=.
+endif
 
-$(CONTRIB_OBJS_DIR)-optlp-%.obj: %.cpp
-	..\..\admb -c -f $(OPTION) $<
-	copy $(basename $<).obj $@
+ifeq ($(CMDSHELL),cmd)
+SAFE_PREFIX=$(CONTRIB_OBJS_DIR)\saflp-contrib-
+OPT_PREFIX=$(CONTRIB_OBJS_DIR)\optlp-contrib-
 else
-  ifeq ($(SAFE_ONLY),yes)
-all: $(addprefix $(CONTRIB_OBJS_DIR)-saflp-, $(OBJECTS))
-  else
-all: $(addprefix $(CONTRIB_OBJS_DIR)-saflp-, $(OBJECTS)) $(addprefix $(CONTRIB_OBJS_DIR)-optlp-, $(OBJECTS))
-  endif
+SAFE_PREFIX=$(CONTRIB_OBJS_DIR)/saflp-contrib-
+OPT_PREFIX=$(CONTRIB_OBJS_DIR)/optlp-contrib-
+endif
 
-$(CONTRIB_OBJS_DIR)-saflp-%.obj: %.cpp
+ifeq ($(SAFE_ONLY),yes)
+all: $(addprefix $(SAFE_PREFIX), $(OBJECTS))
+else
+all: $(addprefix $(SAFE_PREFIX), $(OBJECTS)) $(addprefix $(OPT_PREFIX), $(OBJECTS))
+endif
+
+$(SAFE_PREFIX)%.obj: %.cpp
+ifeq ($(CMDSHELL),cmd)
+	..\..\admb.cmd -c $(OPTION) $<
+	copy $(basename $<).obj "$@"
+else
 	../../admb$(EXT) -c $(OPTION) $<
 	cp $(basename $<).obj $@
+endif
 
-$(CONTRIB_OBJS_DIR)-optlp-%.obj: %.cpp
+$(OPT_PREFIX)%.obj: %.cpp
+ifeq ($(CMDSHELL),cmd)
+	..\..\admb.cmd -c -f $(OPTION) $<
+	copy $(basename $<).obj "$@"
+else
 	../../admb$(EXT) -c -f $(OPTION) $<
 	cp $(basename $<).obj $@
 endif
 
 includes:
-ifeq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	for %%a in ($(HEADERS)) do copy %%a $(CONTRIB_INCLUDE)
 else
 	cp $(HEADERS) $(CONTRIB_INCLUDE)
 endif
 
 test:
-ifneq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	$(MAKE) --directory=tests
 endif
 
 clean:
-ifeq ($(SHELL),cmd)
+ifeq ($(CMDSHELL),cmd)
 	del /Q $(OBJECTS) 2>nul
 else
 	@rm -vf $(OBJECTS)

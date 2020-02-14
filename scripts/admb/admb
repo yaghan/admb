@@ -8,7 +8,7 @@ shopt -s expand_aliases
 alias help='echo -e "
 Builds AD Model Builder executable or library.
 
-Release Version: 12.0
+Release Version: 12.1
 Location: $BASH_SOURCE
 
 Usage: admb [-c] [-d] [-g] [-r] [-f] model [src(s)]
@@ -136,9 +136,9 @@ if [ "$UNAME_S" == "Linux" ]; then
     CXX=g++
   fi
   if [[ "`$CXX -dumpmachine`" =~ "x86_64" ]]; then
-    OS_NAME=-x86_64-linux
+    OS_NAME=x86_64-linux
   else
-    OS_NAME=-i686-linux
+    OS_NAME=i686-linux
   fi
 fi
 if [ "$UNAME_S" == "Darwin" ]; then
@@ -146,9 +146,9 @@ if [ "$UNAME_S" == "Darwin" ]; then
     CXX=c++
   fi
   if [[ "`$CXX -dumpmachine`" =~ "x86_64" ]]; then
-    OS_NAME=-x86_64-macosx
+    OS_NAME=x86_64-macos
   else
-    OS_NAME=-i686-macosx
+    OS_NAME=i686-macos
   fi
 fi
 if [[ "$UNAME_S" =~ "_NT" ]]; then
@@ -157,17 +157,9 @@ if [[ "$UNAME_S" =~ "_NT" ]]; then
   fi
   if [ "$CXX" == "g++" ]; then
     if [[ "`$CXX -dumpmachine`" =~ "x86_64" ]]; then
-      if [[ "`$CXX --version`" =~ "MSYS2" ]]; then
-        OS_NAME=-x86_64-msys
-      else
-        OS_NAME=-mingw64
-      fi
+      OS_NAME=mingw64
     else
-      if [[ "`$CXX --version`" =~ "MSYS2" ]]; then
-        OS_NAME=-i686-msys
-      else
-        OS_NAME=-mingw32
-      fi
+      OS_NAME=mingw32
     fi
   fi
 fi
@@ -180,8 +172,20 @@ if [ "$CXX" == "clang++" ]; then
   CXXVERSION="$OS_NAME-$CXX$DUMPVERSION"
 fi
 if [ "$CXX" == "c++" ]; then
-  DUMPVERSION="`c++ -dumpversion | cut -f1 -d. `"
-  CXXVERSION="$OS_NAME-$CXX$DUMPVERSION"
+  if [ "$UNAME_S" == "Darwin" ]; then
+    if [[ "`$CXX --version`" =~ "clang-1100" ]]; then
+      CXXVERSION=$OS_NAME-clang11
+    else
+      if [[ "`$CXX --version`" =~ "clang-1000" ]]; then
+        CXXVERSION=$OS_NAME-clang10
+      else
+        CXXVERSION=$OS_NAME-clang
+      fi
+    fi
+  else
+    DUMPVERSION="`c++ -dumpversion | cut -f1 -d. `"
+    CXXVERSION="$OS_NAME-$CXX$DUMPVERSION"
+  fi
 fi
 if [ "$CXX" == "analyze-c++" ]; then
   DUMPVERSION="`analyze-c++ -dumpversion | cut -f1 -d. `"
@@ -263,7 +267,7 @@ CXXFLAGS="$CXXFLAGS -D_USE_MATH_DEFINES"
 if [ "$library" == "opt" ]; then
   CXXFLAGS="$CXXFLAGS -DOPT_LIB"
 fi
-if [ -f "$ADMB_HOME/lib/libadmb-contrib$CXXVERSION$SHARED.a" ]; then
+if [[ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a" || -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a" ]]; then
   CXXFLAGS="$CXXFLAGS -DUSE_ADMB_CONTRIBS -I. -I\"$ADMB_HOME/include\" -I\"$ADMB_HOME/include/contrib\""
 else
   CXXFLAGS="$CXXFLAGS -I. -I\"$ADMB_HOME/include\""
@@ -371,17 +375,75 @@ do
     CMD="$CXX $LDFLAGS -o$model"
   fi
   CMD="$CMD $file $objs"
-  if [ ! -f "$ADMB_HOME/lib/libadmb-contrib$CXXVERSION$SHARED.a" ]; then
-    if [[ "$library" == "opt" ]]; then
-      CMD="$CMD \"$ADMB_HOME/lib/libadmbo$CXXVERSION$SHARED.a\""
+  if [ ! -z  "$debug" ]; then
+    if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a" ]; then
+      if [[ "$library" == "opt" ]]; then
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED-debug.a\""
+      else
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a\""
+      fi
     else
-      CMD="$CMD \"$ADMB_HOME/lib/libadmb$CXXVERSION$SHARED.a\""
+      if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a" ]; then
+        if [[ "$library" == "opt" ]]; then
+          CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED-debug.a\""
+        else
+          CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a\""
+        fi
+      else
+        if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a" ]; then
+          if [[ "$library" == "opt" ]]; then
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED.a\""
+          else
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a\""
+          fi
+        else
+          if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a" ]; then
+            if [[ "$library" == "opt" ]]; then
+              CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED.a\""
+            else
+              CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a\""
+            fi
+          else
+            echo -e "\\nError: Unable to find libadmb-contrib-$CXXVERSION$SHARED-debug.a\\n"
+            exit 0
+          fi
+        fi
+      fi
     fi
   else
-    if [[ "$library" == "opt" ]]; then
-      CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo$CXXVERSION$SHARED.a\""
+    if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a" ]; then
+      if [[ "$library" == "opt" ]]; then
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED.a\""
+      else
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a\""
+      fi
     else
-      CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib$CXXVERSION$SHARED.a\""
+      if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a" ]; then
+        if [[ "$library" == "opt" ]]; then
+          CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED.a\""
+        else
+          CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a\""
+        fi
+      else
+        if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a" ]; then
+          if [[ "$library" == "opt" ]]; then
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED-debug.a\""
+          else
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a\""
+          fi
+        else
+          if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a" ]; then
+            if [[ "$library" == "opt" ]]; then
+              CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED-debug.a\""
+            else
+              CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a\""
+            fi
+          else
+            echo -e "\\nError: Unable to find libadmb-contrib-$CXXVERSION$SHARED.a\\n"
+            exit 0
+          fi
+        fi
+      fi
     fi
   fi
   echo -e \\n\*\*\* Linking: $file $objs\\n$CMD
@@ -424,17 +486,75 @@ if [[ "$tplobjs" == "" ]]; then
     CMD="$CXX $LDFLAGS -o$outputfilebasename"
   fi
   CMD="$CMD $listobjs"
-  if [ ! -f "$ADMB_HOME/lib/libadmb-contrib$CXXVERSION$SHARED.a" ]; then
-    if [[ "$library" == "opt" ]]; then
-      CMD="$CMD \"$ADMB_HOME/lib/libadmbo$CXXVERSION$SHARED.a\""
+  if [ ! -z  "$debug" ]; then
+    if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a" ]; then
+      if [[ "$library" == "opt" ]]; then
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED-debug.a\""
+      else
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a\""
+      fi
     else
-      CMD="$CMD \"$ADMB_HOME/lib/libadmb$CXXVERSION$SHARED.a\""
+      if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a" ]; then
+        if [[ "$library" == "opt" ]]; then
+          CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED-debug.a\""
+        else
+          CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a\""
+        fi
+      else
+        if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a" ]; then
+          if [[ "$library" == "opt" ]]; then
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED.a\""
+          else
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a\""
+          fi
+        else
+          if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a" ]; then
+            if [[ "$library" == "opt" ]]; then
+              CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED.a\""
+            else
+              CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a\""
+            fi
+          else
+            echo -e "\\nError: Unable to find libadmb-contrib-$CXXVERSION$SHARED-debug.a\\n"
+            exit 0
+          fi
+        fi
+      fi
     fi
   else
-    if [[ "$library" == "opt" ]]; then
-      CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo$CXXVERSION$SHARED.a\""
+    if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a" ]; then
+      if [[ "$library" == "opt" ]]; then
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED.a\""
+      else
+        CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED.a\""
+      fi
     else
-      CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib$CXXVERSION$SHARED.a\""
+      if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a" ]; then
+        if [[ "$library" == "opt" ]]; then
+          CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED.a\""
+        else
+          CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED.a\""
+        fi
+      else
+        if [ -f "$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a" ]; then
+          if [[ "$library" == "opt" ]]; then
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contribo-$CXXVERSION$SHARED-debug.a\""
+          else
+            CMD="$CMD \"$ADMB_HOME/lib/libadmb-contrib-$CXXVERSION$SHARED-debug.a\""
+          fi
+        else
+          if [ -f "$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a" ]; then
+            if [[ "$library" == "opt" ]]; then
+              CMD="$CMD \"$ADMB_HOME/lib/libadmbo-$CXXVERSION$SHARED-debug.a\""
+            else
+              CMD="$CMD \"$ADMB_HOME/lib/libadmb-$CXXVERSION$SHARED-debug.a\""
+            fi
+          else
+            echo -e "\\nError: Unable to find libadmb-contrib-$CXXVERSION$SHARED.a\\n"
+            exit 0
+          fi
+        fi
+      fi
     fi
   fi
   echo -e \\n\*\*\* Linking: $listobjs\\n$CMD
