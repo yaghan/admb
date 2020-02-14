@@ -56,6 +56,7 @@ test-rgamma:
 	$(MAKE) --directory=rgamma
 
 core-tpls:\
+  coverity\
   tpl-dd2\
   tpl-testminmax\
   example-prof_like\
