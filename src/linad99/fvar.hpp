@@ -1299,21 +1299,18 @@ object is passed on the stack.
 class prevariable
 {
 protected:
-#ifndef __SUN__
   /**
   Default constructor
   */
-  prevariable(): v(nullptr) { }
-#endif
-#ifndef __NDPX__
-   prevariable(double_and_int* u): v(u) { }
-#endif
+  prevariable() { }
+  prevariable(double_and_int* u): v(u) { }
+
 public:
 
   prevariable(const prevariable& other): v(other.v) { }
   ~prevariable() {}
 
-  double_and_int* v; ///< pointer to the data
+  double_and_int* v = nullptr; ///< pointer to the data
 
    friend class dvar_vector_iterator;
    friend class dvar_vector;
@@ -1452,18 +1449,6 @@ public:
 #endif
 
  public:
-#ifdef __SUN__
-   prevariable(void)
-   {
-   }
-#endif
-#ifdef __NDPX__
-   prevariable(double_and_int * u)
-   {
-      v = u;
-   }
-#endif
-
    void initialize(void);
 
    friend char *fform(const char *, const prevariable &);
