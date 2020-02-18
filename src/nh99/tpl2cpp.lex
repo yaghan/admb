@@ -261,7 +261,11 @@ FINAL_SECTION  {
     setup_for_prior_likelihood();
 
     fprintf(fall,"%s","}\n\nvoid model_parameters::final_calcs()"
-      "\n{\n");
+      "\n{");
+
+    fprintf(fall,"\n#ifdef DEBUG\n");
+    fprintf(fall,"\ncout << endl << \"GRAD_LIST total addresses: \" << gradient_structure::GRAD_LIST->total_addresses() << endl;\n");
+    fprintf(fall,"\n#endif\n");
   }
                 }
 
@@ -4197,6 +4201,9 @@ TOP_OF_MAIN_SECTION {
       fprintf(fall,"}\n");
       fprintf(fall,"\nvoid model_parameters::final_calcs(void)"
         "{");
+      fprintf(fall,"\n#ifdef DEBUG\n");
+      fprintf(fall,"\ncout << endl << \"GRAD_LIST total addresses: \" << gradient_structure::GRAD_LIST->total_addresses() << endl;\n");
+      fprintf(fall,"\n#endif\n");
     }
 
     if (!runtime_defined)
