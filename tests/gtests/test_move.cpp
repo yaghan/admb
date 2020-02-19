@@ -16,18 +16,6 @@ TEST_F(test_move, gradnew)
 
   ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
 }
-TEST_F(test_move, amovea)
-{
-  gradient_structure gs;
-
-  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
-
-  dvariable a;
-
-  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
-
-  dvariable a(a);
-}
 TEST_F(test_move, amove)
 {
   gradient_structure gs;
