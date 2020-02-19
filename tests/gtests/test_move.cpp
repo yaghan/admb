@@ -4,6 +4,54 @@
 
 class test_move: public ::testing::Test {};
 
+double_and_int* gradnew();
+
+TEST_F(test_move, gradnew)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  double_and_int* p = gradnew();
+
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+}
+TEST_F(test_move, amovea)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvariable a;
+
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvariable a(a);
+}
+TEST_F(test_move, amove)
+{
+  gradient_structure gs;
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvariable a;
+
+  double_and_int* av = a.get_v();
+
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvariable b(a);
+  ASSERT_TRUE(b.get_v() != av);
+
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+
+  dvariable c(std::move(a));
+
+  ASSERT_EQ(1752, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_TRUE(a.get_v() == NULL);
+  ASSERT_TRUE(c.get_v() == av);
+}
 TEST_F(test_move, follow_gradient_structure)
 {
   ASSERT_TRUE(gradient_structure::GRAD_STACK1 == NULL);
