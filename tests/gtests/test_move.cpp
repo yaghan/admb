@@ -6,6 +6,47 @@ class test_move: public ::testing::Test {};
 
 double_and_int* gradnew();
 
+TEST_F(test_move, dvariable_move_constructor)
+{
+  gradient_structure gs;
+
+  dvariable a(5.25);
+  ASSERT_TRUE(a.v != nullptr);
+  ASSERT_DOUBLE_EQ(5.25, a.v->x);
+
+  double_and_int* ptr = a.v;
+
+  dvariable b(std::move(a));
+
+  ASSERT_TRUE(a.v == nullptr);
+  ASSERT_TRUE(b.v == ptr);
+  ASSERT_DOUBLE_EQ(5.25, b.v->x);
+}
+TEST_F(test_move, dvar_vector_max)
+{
+  gradient_structure gs;
+
+  dvar_vector variables(1, 4);
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  double_and_int* ptr = nullptr;
+  dvariable result(ptr);
+
+  ASSERT_EQ(1750, gradient_structure::GRAD_LIST->total_addresses());
+
+  result = max(variables);
+
+  ASSERT_EQ(1751, gradient_structure::GRAD_LIST->total_addresses());
+}
+TEST_F(test_move, d3_array_cube)
+{
+  d3_array values(1, 2, 3, 4, 5, 8);
+  ASSERT_EQ(values.get_ncopies(), 0);
+
+  d3_array results(cube(values));
+  ASSERT_EQ(results.get_ncopies(), 0);
+}
 TEST_F(test_move, gradnew)
 {
   gradient_structure gs;

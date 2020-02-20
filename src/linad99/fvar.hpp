@@ -1519,7 +1519,7 @@ class dvariable:public prevariable
    dvariable(kkludge_object);
    dvariable(const prevariable&);
    dvariable(const dvariable&);
-   dvariable(dvariable&& other): prevariable(other.v) { other.v = nullptr; }
+   dvariable(dvariable&& other): prevariable(std::move(other)) { }
    dvariable(double_and_int*);
    dvariable& operator=(const prevariable&);
    dvariable& operator=(const dvariable&);
