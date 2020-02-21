@@ -114,30 +114,14 @@ dvariable::dvariable(kkludge_object)
 /** Destructor; frees memory on gradient stack.  */
 dvariable::~dvariable() { if (v != nullptr) gradfree((dlink*)v); }
 /**
-   Creates dvariable instance from a double constant.
-   Creates new dvariable object,
-   Sets Value to the argument and initializes derivative information.
-   \param t constant double passed by value.
- */
-dvariable::dvariable(const double t)
+Creates dvariable instance from a double constant.
+Creates new dvariable object,
+Sets Value to the argument and initializes derivative information.
+\param t constant double passed by value.
+*/
+dvariable::dvariable(const double t): prevariable(gradnew())
 {
-  v = gradnew();
   v->x = t;
-  //(*v).nc=0;
-  gradient_structure::GRAD_STACK1->set_gradient_stack0(default_evaluation0,
-    &(v->x));
-}
-/**
-   Creates dvariable instance from a int constant.
-   Creates new dvariable object,
-   Sets value to the argument and initializes derivatve information.
-   \param t constant integer passed by reference.
- */
-dvariable::dvariable(const int& t)
-{
-  v = gradnew();
-  v->x = t;
-  //(*v).nc=0;
-  gradient_structure::GRAD_STACK1->set_gradient_stack0(default_evaluation0,
-    &(v->x) );
+  gradient_structure::GRAD_STACK1->set_gradient_stack0(
+    default_evaluation0, &(v->x));
 }

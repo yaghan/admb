@@ -6,6 +6,15 @@ class test_move: public ::testing::Test {};
 
 double_and_int* gradnew();
 
+TEST_F(test_move, dvariable_constructor_int)
+{
+  gradient_structure gs;
+
+  const int integer = 5;
+  dvariable a(integer);
+
+  ASSERT_DOUBLE_EQ(5, a.v->x);
+}
 TEST_F(test_move, dvariable_copy_constructor)
 {
   gradient_structure gs;

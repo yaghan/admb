@@ -1515,7 +1515,15 @@ public:
    dvariable();
    ~dvariable();
    dvariable(double t);
-   dvariable(const int &t);
+
+  /**
+  Creates dvariable instance from a int constant.
+  Creates new dvariable object,
+  Sets value to the argument and initializes derivatve information.
+  \param t constant integer passed by reference.
+  */
+  dvariable(const int& t) : dvariable(static_cast<double>(t)) {};
+
    dvariable(kkludge_object);
 
   /**
