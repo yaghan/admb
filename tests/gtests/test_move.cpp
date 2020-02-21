@@ -6,6 +6,40 @@ class test_move: public ::testing::Test {};
 
 double_and_int* gradnew();
 
+TEST_F(test_move, dvariable_copy_constructor)
+{
+  gradient_structure gs;
+
+  dvariable a(5.25);
+  ASSERT_TRUE(a.v != nullptr);
+  ASSERT_DOUBLE_EQ(5.25, a.v->x);
+
+  double_and_int* aptr = a.v;
+
+  dvariable b(a);
+
+  ASSERT_TRUE(a.v == aptr);
+  ASSERT_DOUBLE_EQ(5.25, a.v->x);
+  ASSERT_TRUE(b.v != aptr);
+  ASSERT_DOUBLE_EQ(5.25, b.v->x);
+}
+TEST_F(test_move, dvariable_copy_prevariable_constructor)
+{
+  gradient_structure gs;
+
+  dvar_vector v(1, 1);
+  v(1) = 5.25;
+  ASSERT_TRUE(v(1).v != nullptr);
+  ASSERT_DOUBLE_EQ(5.25, v(1).v->x);
+  double_and_int* vptr = v(1).v;
+
+  dvariable b(v(1));
+
+  ASSERT_TRUE(v(1).v == vptr);
+  ASSERT_DOUBLE_EQ(5.25, v(1).v->x);
+  ASSERT_TRUE(b.v != vptr);
+  ASSERT_DOUBLE_EQ(5.25, b.v->x);
+}
 TEST_F(test_move, dvariable_move_constructor)
 {
   gradient_structure gs;

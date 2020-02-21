@@ -1505,20 +1505,27 @@ class df1_one_variable;
 class df1_two_variable;
 class df1_three_variable;
 
-  /**
-  Fundamental data type for reverse mode automatic differentiation.
-  \ingroup BAD
- */
+/**
+Fundamental data type for reverse mode automatic differentiation.
+\ingroup BAD
+*/
 class dvariable:public prevariable
 {
- public:
+public:
    dvariable();
    ~dvariable();
    dvariable(double t);
    dvariable(const int &t);
    dvariable(kkludge_object);
-   dvariable(const prevariable&);
-   dvariable(const dvariable&);
+
+  /**
+  Constructor for dvariable object from its base class; deep copy.
+  Allocates memory and assigns value of argument to new object.
+  \param t constant prevariable object
+  */
+  dvariable(const prevariable& other): dvariable(static_cast<const dvariable&>(other)) {}
+
+  dvariable(const dvariable&);
    dvariable(dvariable&& other): prevariable(std::move(other)) { }
    dvariable(double_and_int*);
    dvariable& operator=(const prevariable&);
