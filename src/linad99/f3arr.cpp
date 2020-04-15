@@ -577,6 +577,13 @@ dvar3_array::dvar3_array(const dvar3_array& other)
 {
   shallow_copy(other);
 }
+/// Move constructor
+dvar3_array::dvar3_array(dvar3_array&& other)
+{
+  shallow_copy(other);
+  other.allocate();
+  if (shape) --(shape->ncopies);
+}
 /**
 Shallow copy other data structure pointers.
 

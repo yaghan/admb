@@ -4153,7 +4153,8 @@ public:
    dvar3_array(const param_init_bounded_matrix_vector & m2);
 #   endif
 
-   dvar3_array(const dvar3_array & m2);
+   dvar3_array(const dvar3_array&);
+   dvar3_array(dvar3_array&&);
 
    dvar3_array(void);
 
@@ -4283,9 +4284,10 @@ public:
    const dvar_matrix & operator() (int i) const;
 #endif
 
-   dvar3_array & operator=(const d3_array & m1);
-   dvar3_array & operator=(double x);
-   dvar3_array & operator=(const dvar3_array & m1);
+   dvar3_array& operator=(const d3_array&);
+   dvar3_array& operator=(double x);
+   dvar3_array& operator=(const dvar3_array&);
+   dvar3_array& operator=(dvar3_array&&);
 
    void fill_randu(long int &n);
    void fill_randn(long int &n);
