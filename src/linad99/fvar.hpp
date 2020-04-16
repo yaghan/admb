@@ -2145,9 +2145,11 @@ public:
    friend dvar_matrix operator*(const dvar_matrix & m1, const dmatrix & m2);
 
    void deallocate();
-   dvar_vector(const dvar_vector &);
-   dvar_vector(const predvar_vector &);
+
    dvar_vector();
+   dvar_vector(const dvar_vector&);
+   dvar_vector(dvar_vector&&);
+   dvar_vector(const predvar_vector &);
    dvar_vector(int ncl, int ncu); // makes an array [ncl..ncu]
    dvar_vector(int ncl, int ncu, kkludge_object);
 
@@ -2262,7 +2264,8 @@ public:
    dvar_vector & operator-=(const dvector & v1);
    dvar_vector & operator+=(const dvar_vector & v1);
    dvar_vector & operator-=(const dvar_vector & v1);
-   dvar_vector & operator=(const dvar_vector & t);
+   dvar_vector& operator=(const dvar_vector&);
+   dvar_vector& operator=(dvar_vector&&);
    dvar_vector & operator=(const dvector & t);
    dvar_vector & operator =(double t);
    dvar_vector & operator=(const prevariable & t);

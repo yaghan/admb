@@ -502,7 +502,12 @@ TEST_F(test_dvar_vector, sine)
 
   dvar_vector sin(const dvar_vector&);
 
+  unsigned long _last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t _total = gradient_structure::GRAD_STACK1->total();
+
   results = sin(a);
+  ASSERT_EQ(_total + 2, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(_last + 32, gradient_structure::ARR_LIST1->get_max_last_offset());
 
   ASSERT_DOUBLE_EQ(value(results(1)), std::sin(independents(1)));
   ASSERT_DOUBLE_EQ(value(results(2)), std::sin(independents(2)));
@@ -543,11 +548,18 @@ TEST_F(test_dvar_vector, tan)
 
   dvar_vector a(independents);
 
-  dvar_vector results(1, 4);
+  unsigned long _begin = gradient_structure::ARR_LIST1->get_max_last_offset();
+  //dvar_vector results(1, 4);
+  dvar_vector results;
+  ASSERT_EQ(_begin, gradient_structure::ARR_LIST1->get_max_last_offset());
 
   dvar_vector tan(const dvar_vector&);
 
+  unsigned long _last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t _total = gradient_structure::GRAD_STACK1->total();
   results = tan(a);
+  ASSERT_EQ(_total + 1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(_last + 4 * sizeof(double_and_int), gradient_structure::ARR_LIST1->get_max_last_offset());
 
   ASSERT_DOUBLE_EQ(value(results(1)), std::tan(independents(1)));
   ASSERT_DOUBLE_EQ(value(results(2)), std::tan(independents(2)));
@@ -637,7 +649,11 @@ TEST_F(test_dvar_vector, sqrt)
 
   dvar_vector sqrt(const dvar_vector&);
 
+  unsigned long _last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t _total = gradient_structure::GRAD_STACK1->total();
   results = sqrt(a);
+  ASSERT_EQ(_total + 2, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(_last + 32, gradient_structure::ARR_LIST1->get_max_last_offset());
 
   ASSERT_DOUBLE_EQ(value(results(1)), std::sqrt(independents(1)));
   ASSERT_DOUBLE_EQ(value(results(2)), std::sqrt(independents(2)));
@@ -696,4 +712,165 @@ TEST_F(test_dvar_vector, sqrvariable)
   ASSERT_DOUBLE_EQ(gradients(2), 2.0 * independents(2));
   ASSERT_DOUBLE_EQ(gradients(3), 2.0 * independents(3));
   ASSERT_DOUBLE_EQ(gradients(4), 2.0 * independents(4));
+}
+TEST_F(test_dvar_vector, copy)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  independent_variables independents(1, 4);
+  independents(1) = -4.2;
+  independents(2) = 4.2;
+  independents(3) = 10.2;
+  independents(4) = -14.2;
+
+  dvar_vector a(independents);
+  double_and_int* a1 = a.get_va();
+
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  dvar_vector b(a);
+  ASSERT_EQ(total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 == b.get_va());
+  ASSERT_FALSE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_DOUBLE_EQ(value(b(1)), independents(1));
+  ASSERT_DOUBLE_EQ(value(b(2)), independents(2));
+  ASSERT_DOUBLE_EQ(value(b(3)), independents(3));
+  ASSERT_DOUBLE_EQ(value(b(4)), independents(4));
+
+  ASSERT_EQ(1, a.get_ncopies());
+  ASSERT_EQ(1, b.get_ncopies());
+}
+TEST_F(test_dvar_vector, assignment)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  independent_variables independents(1, 4);
+  independents(1) = -4.2;
+  independents(2) = 4.2;
+  independents(3) = 10.2;
+  independents(4) = -14.2;
+
+  dvar_vector a(independents);
+  double_and_int* a1 = a.get_va();
+
+  dvar_vector b;
+
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  b = a;
+  ASSERT_EQ(total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 == b.get_va());
+  ASSERT_FALSE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_DOUBLE_EQ(value(b(1)), independents(1));
+  ASSERT_DOUBLE_EQ(value(b(2)), independents(2));
+  ASSERT_DOUBLE_EQ(value(b(3)), independents(3));
+  ASSERT_DOUBLE_EQ(value(b(4)), independents(4));
+
+  ASSERT_EQ(1, a.get_ncopies());
+  ASSERT_EQ(1, b.get_ncopies());
+}
+TEST_F(test_dvar_vector, assignment2)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  independent_variables independents(1, 4);
+  independents(1) = -4.2;
+  independents(2) = 4.2;
+  independents(3) = 10.2;
+  independents(4) = -14.2;
+
+  dvar_vector a(independents);
+  double_and_int* a1 = a.get_va();
+
+  dvar_vector b(1, 4);
+
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  b = a;
+  ASSERT_EQ(total + 1, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 != b.get_va());
+  ASSERT_FALSE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_DOUBLE_EQ(value(b(1)), independents(1));
+  ASSERT_DOUBLE_EQ(value(b(2)), independents(2));
+  ASSERT_DOUBLE_EQ(value(b(3)), independents(3));
+  ASSERT_DOUBLE_EQ(value(b(4)), independents(4));
+
+  ASSERT_EQ(0, a.get_ncopies());
+  ASSERT_EQ(0, b.get_ncopies());
+}
+TEST_F(test_dvar_vector, move)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  independent_variables independents(1, 4);
+  independents(1) = -4.2;
+  independents(2) = 4.2;
+  independents(3) = 10.2;
+  independents(4) = -14.2;
+
+  dvar_vector a(independents);
+  double_and_int* a1 = a.get_va();
+
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  dvar_vector b(std::move(a));
+  ASSERT_EQ(total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 == b.get_va());
+  ASSERT_TRUE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_DOUBLE_EQ(value(b(1)), independents(1));
+  ASSERT_DOUBLE_EQ(value(b(2)), independents(2));
+  ASSERT_DOUBLE_EQ(value(b(3)), independents(3));
+  ASSERT_DOUBLE_EQ(value(b(4)), independents(4));
+
+  ASSERT_EQ(0, a.get_ncopies());
+  ASSERT_EQ(0, b.get_ncopies());
+}
+TEST_F(test_dvar_vector, move_assignment)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  independent_variables independents(1, 4);
+  independents(1) = -4.2;
+  independents(2) = 4.2;
+  independents(3) = 10.2;
+  independents(4) = -14.2;
+
+  dvar_vector a(independents);
+  double_and_int* a1 = a.get_va();
+
+  dvar_vector b;
+
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  b = std::move(a);
+  ASSERT_EQ(total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 == b.get_va());
+  ASSERT_TRUE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_DOUBLE_EQ(value(b(1)), independents(1));
+  ASSERT_DOUBLE_EQ(value(b(2)), independents(2));
+  ASSERT_DOUBLE_EQ(value(b(3)), independents(3));
+  ASSERT_DOUBLE_EQ(value(b(4)), independents(4));
+
+  ASSERT_EQ(0, a.get_ncopies());
+  ASSERT_EQ(0, b.get_ncopies());
 }

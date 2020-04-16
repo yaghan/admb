@@ -50,6 +50,13 @@ dvar_vector::dvar_vector(const dvar_vector& other)
        << &va << "  pointing at  " << (va+indexmin()) << "\n";
 #endif
 }
+/// Move constructor
+dvar_vector::dvar_vector(dvar_vector&& other)
+{
+  shallow_copy(other);
+  other.allocate();
+  if (shape) --(shape->ncopies);
+}
 /**
 Shallow copy other data structure pointers.
 

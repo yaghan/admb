@@ -24,6 +24,26 @@ void dv_assign(void);
 #endif
 
 /**
+Move values from other to dvar_vector.
+
+@param other dvar_vector
+*/
+dvar_vector& dvar_vector::operator=(dvar_vector&& other)
+{
+  if (shape)
+  {
+    return operator=(other);
+  }
+
+  if (this != &other)
+  {
+    shallow_copy(other);
+    other.allocate();
+    if (shape) --(shape->ncopies);
+  }
+  return *this;
+}
+/**
 Assign values from other t to dvar_vector.
 
 @param t other dvar_vector

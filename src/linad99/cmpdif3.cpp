@@ -195,11 +195,7 @@ void ivector::save_ivector_position(void) const
   ivector_position tmp(*this);
   gradient_structure::get_fp()->fwrite(&tmp, wsize);
 }
-
-/**
- * Description not yet available.
- * \param
- */
+/** Writes to file the dimension and location of data in ARRAY_MEMBLOCK_BASE.*/
 void dvar_vector::save_dvar_vector_position(void) const
 {
   // saves the size and address information for a dvar_vector
