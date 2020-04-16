@@ -2367,10 +2367,8 @@ public:
 //class fvar_ptr { dvar_vector *p; };
 
 /**
- * Class definition of matrix with derivitive information
-  \index_min
-
- */
+Class dvar_matrix for computing gradient with a matrix.
+*/
 class dvar_matrix
 {
    int index_min;
@@ -2504,7 +2502,8 @@ class dvar_matrix
    dvar_matrix(int, int, int, const ivector &);
    // makes a ragged dvar_matrix [nrl..nrh][ncl..nch]
 
-   dvar_matrix(const dvar_matrix &);
+   dvar_matrix(const dvar_matrix&);
+   dvar_matrix(dvar_matrix&&);
    // copy initializer
    void initialize(void);
 
@@ -2599,6 +2598,7 @@ class dvar_matrix
 
 
    dvar_matrix & operator=(const dvar_matrix &);
+   dvar_matrix& operator=(dvar_matrix&&);
 
    dvar_matrix & operator=(const dmatrix &);
    dvar_matrix & operator =(double t);

@@ -24,7 +24,10 @@ TEST_F(test_dvar_matrix, square_multiplication)
   b(2, 1) = 7;
   b(2, 2) = 8;
   
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
   dvar_matrix ab = a * b;
+  ASSERT_EQ(_total + 2, gradient_structure::GRAD_STACK1->total());
+
   ASSERT_DOUBLE_EQ(19, value(ab(1, 1)));
   ASSERT_DOUBLE_EQ(22, value(ab(1, 2)));
   ASSERT_DOUBLE_EQ(43, value(ab(2, 1)));
@@ -100,7 +103,10 @@ TEST_F(test_dvar_matrix, mean_matrix)
   a(1, 2) = 1;
   a(2, 1) = 1;
   a(2, 2) = 1;
+
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
   dvariable d = mean(a);
+  ASSERT_EQ(_total + 11, gradient_structure::GRAD_STACK1->total());
 
   ASSERT_DOUBLE_EQ(1, value(d));
 }
@@ -347,4 +353,145 @@ TEST_F(test_dvar_matrix, deallocatecopies)
   ASSERT_EQ(0, a.get_ncopies());
   ASSERT_EQ(0, firstcopy.get_ncopies());
   ASSERT_EQ(0, secondcopy.get_ncopies());
+}
+TEST_F(test_dvar_matrix, copy)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  dvar_matrix a(1, 2, 1, 3);
+  a(1, 1) = 5.25;
+  a(1, 2) = -2.33;
+  a(1, 3) = 3.7;
+  a(2, 1) = 2.9;
+  a(2, 2) = 4.34;
+  a(2, 3) = -6.3;
+
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
+  dvar_matrix b(a);
+  ASSERT_EQ(_total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(&a[1] == &b[1]);
+  ASSERT_FALSE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_EQ(1, a.get_ncopies());
+  ASSERT_EQ(1, b.get_ncopies());
+
+  ASSERT_EQ(value(a(1, 1)), value(b(1, 1)));
+  ASSERT_EQ(value(a(1, 2)), value(b(1, 2)));
+  ASSERT_EQ(value(a(1, 3)), value(b(1, 3)));
+  ASSERT_EQ(value(a(2, 1)), value(b(2, 1)));
+  ASSERT_EQ(value(a(2, 2)), value(b(2, 2)));
+  ASSERT_EQ(value(a(2, 3)), value(b(2, 3)));
+}
+TEST_F(test_dvar_matrix, assignment)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  dvar_matrix a(1, 2, 1, 3);
+  a(1, 1) = 5.25;
+  a(1, 2) = -2.33;
+  a(1, 3) = 3.7;
+  a(2, 1) = 2.9;
+  a(2, 2) = 4.34;
+  a(2, 3) = -6.3;
+
+  dvar_matrix b(1, 2, 1, 3);
+
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
+  b = a;
+  ASSERT_EQ(_total + 2, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(&a[1] != &b[1]);
+  ASSERT_FALSE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_EQ(0, a.get_ncopies());
+  ASSERT_EQ(0, b.get_ncopies());
+
+  ASSERT_EQ(value(a(1, 1)), value(b(1, 1)));
+  ASSERT_EQ(value(a(1, 2)), value(b(1, 2)));
+  ASSERT_EQ(value(a(1, 3)), value(b(1, 3)));
+  ASSERT_EQ(value(a(2, 1)), value(b(2, 1)));
+  ASSERT_EQ(value(a(2, 2)), value(b(2, 2)));
+  ASSERT_EQ(value(a(2, 3)), value(b(2, 3)));
+}
+TEST_F(test_dvar_matrix, move_constructor)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  dmatrix _a(1, 2, 1, 3);
+  _a(1, 1) = 5.25;
+  _a(1, 2) = -2.33;
+  _a(1, 3) = 3.7;
+  _a(2, 1) = 2.9;
+  _a(2, 2) = 4.34;
+  _a(2, 3) = -6.3;
+
+  dvar_matrix a(_a);
+
+  ASSERT_EQ(0, a.get_ncopies());
+
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
+  dvar_vector* a1 = &a[1];
+  dvar_matrix b(std::move(a));
+  ASSERT_EQ(_total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 == &b[1]);
+  ASSERT_TRUE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_EQ(0, a.get_ncopies());
+  ASSERT_EQ(0, b.get_ncopies());
+
+  ASSERT_EQ(value(b(1, 1)), _a(1, 1));
+  ASSERT_EQ(value(b(1, 2)), _a(1, 2));
+  ASSERT_EQ(value(b(1, 3)), _a(1, 3));
+  ASSERT_EQ(value(b(2, 1)), _a(2, 1));
+  ASSERT_EQ(value(b(2, 2)), _a(2, 2));
+  ASSERT_EQ(value(b(2, 3)), _a(2, 3));
+}
+TEST_F(test_dvar_matrix, move_assignment)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  dmatrix _a(1, 2, 1, 3);
+  _a(1, 1) = 5.25;
+  _a(1, 2) = -2.33;
+  _a(1, 3) = 3.7;
+  _a(2, 1) = 2.9;
+  _a(2, 2) = 4.34;
+  _a(2, 3) = -6.3;
+
+  dvar_matrix a(_a);
+
+  ASSERT_EQ(0, a.get_ncopies());
+
+  dvar_matrix b;
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
+  dvar_vector* a1 = &a[1];
+  b = std::move(a);
+  ASSERT_EQ(_total, gradient_structure::GRAD_STACK1->total());
+
+  ASSERT_TRUE(a1 == &b[1]);
+  ASSERT_TRUE(!a);
+  ASSERT_FALSE(!b);
+
+  ASSERT_EQ(0, a.get_ncopies());
+  ASSERT_EQ(0, b.get_ncopies());
+
+  ASSERT_EQ(value(b(1, 1)), _a(1, 1));
+  ASSERT_EQ(value(b(1, 2)), _a(1, 2));
+  ASSERT_EQ(value(b(1, 3)), _a(1, 3));
+  ASSERT_EQ(value(b(2, 1)), _a(2, 1));
+  ASSERT_EQ(value(b(2, 2)), _a(2, 2));
+  ASSERT_EQ(value(b(2, 3)), _a(2, 3));
 }

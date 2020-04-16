@@ -40,6 +40,18 @@ dvar_matrix::dvar_matrix(const dvar_matrix& other)
     m = other.m;
   }
 }
+//dvar_matrix::dvar_matrix(dvar_matrix&& other): dvar_matrix(other) { }
+/**
+Move constructor
+
+@param other dvar_matrix
+*/
+dvar_matrix::dvar_matrix(dvar_matrix&& other)
+{
+  shallow_copy(other);
+  other.allocate();
+  if (shape) --(shape->ncopies);
+}
 /**
 Copy constructor
 */
@@ -455,7 +467,7 @@ void dvar_matrix::allocate()
   shape = nullptr;
   m = nullptr;
 }
-/// Deallocate dvar_matrix memory.
+/// Deallocate dvar_matrix members.
 void dvar_matrix::deallocate()
 {
   if (shape)
@@ -480,9 +492,9 @@ void dvar_matrix::deallocate()
 #endif
 }
 /**
-Assigns other values to dvar_matrix.
+Assigns values from other to dvar_matrix.
 
-\param values dmatrix
+@param other dvar_matrix
 */
 dvar_matrix& dvar_matrix::operator=(const dvar_matrix& other)
 {
@@ -507,6 +519,24 @@ dvar_matrix& dvar_matrix::operator=(const dvar_matrix& other)
       }
     }
   }
+  return *this;
+}
+/**
+Move values from other to dvar_matrix.
+
+@param other dvar_matrix
+*/
+dvar_matrix& dvar_matrix::operator=(dvar_matrix&& other)
+{
+  //return operator=(other);
+
+  if (this != &other)
+  {
+    shallow_copy(other);
+    other.allocate();
+    if (shape) --(shape->ncopies);
+  }
+
   return *this;
 }
 /**
