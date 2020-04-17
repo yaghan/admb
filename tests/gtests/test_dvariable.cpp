@@ -193,3 +193,73 @@ TEST_F(test_dvariable, mfexp)
   ASSERT_DOUBLE_EQ(result, ::exp(0));
   }
 }
+TEST_F(test_dvariable, copy_constructor)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+
+  size_t addresses = gradient_structure::GRAD_LIST->total_addresses();
+  unsigned long last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  dvariable b(a);
+  ASSERT_EQ(total + 1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(last, gradient_structure::ARR_LIST1->get_max_last_offset());
+  ASSERT_EQ(addresses + 1, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_EQ(value(a), value(b));
+  ASSERT_TRUE(a.get_v() != b.get_v());
+}
+TEST_F(test_dvariable, move_constructor)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+
+  size_t addresses = gradient_structure::GRAD_LIST->total_addresses();
+  unsigned long last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  dvariable b(std::move(a));
+  ASSERT_EQ(total + 1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(last, gradient_structure::ARR_LIST1->get_max_last_offset());
+  ASSERT_EQ(addresses + 1, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_EQ(value(a), value(b));
+  ASSERT_TRUE(a.get_v() != b.get_v());
+}
+TEST_F(test_dvariable, assignment)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+  dvariable b;
+
+  size_t addresses = gradient_structure::GRAD_LIST->total_addresses();
+  unsigned long last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  b = a;
+  ASSERT_EQ(total + 1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(last, gradient_structure::ARR_LIST1->get_max_last_offset());
+  ASSERT_EQ(addresses, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_EQ(value(a), value(b));
+  ASSERT_TRUE(a.get_v() != b.get_v());
+}
+TEST_F(test_dvariable, move_assignment)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+  dvariable b;
+
+  size_t addresses = gradient_structure::GRAD_LIST->total_addresses();
+  unsigned long last = gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t total  = gradient_structure::GRAD_STACK1->total();
+  b = std::move(a);
+  ASSERT_EQ(total + 1, gradient_structure::GRAD_STACK1->total());
+  ASSERT_EQ(last, gradient_structure::ARR_LIST1->get_max_last_offset());
+  ASSERT_EQ(addresses, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_EQ(value(a), value(b));
+  ASSERT_TRUE(a.get_v() != b.get_v());
+}

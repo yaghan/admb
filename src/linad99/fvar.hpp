@@ -1303,9 +1303,7 @@ protected:
   /**
   Default constructor
   */
-  prevariable()
-  {
-  }
+  prevariable();
 #endif
 #ifndef __NDPX__
    prevariable(double_and_int * u)
