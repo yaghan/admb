@@ -80,7 +80,7 @@ prevariable::prevariable(): prevariable(gradnew()) {}
   Allocates memory and assigns value of argument to new object.
   \param t constant prevariable object
  */
-dvariable::dvariable(const prevariable& t): prevariable()
+dvariable::dvariable(const prevariable& t)
 {
   //(*v).nc=0;
   v->x=t.v->x;
@@ -92,7 +92,7 @@ dvariable::dvariable(const prevariable& t): prevariable()
   Allocates memory and assigns value of argument to new object.
   \param t constant devariable object
  */
-dvariable::dvariable(const dvariable& t): prevariable()
+dvariable::dvariable(const dvariable& t)
 {
   v->x=t.v->x;
   gradient_structure::GRAD_STACK1->
@@ -103,7 +103,7 @@ Default constructor.
 
 Creates new zero value dvariable object.
 */
-dvariable::dvariable(): prevariable()
+dvariable::dvariable()
 {
   (*v).x = 0.0;
 
@@ -116,7 +116,7 @@ dvariable::dvariable(): prevariable()
 Specialized constructor that does not create unnecessary entries
 in the gradient structure; see function \ref nograd_assign.
 */
-dvariable::dvariable(kkludge_object): prevariable()
+dvariable::dvariable(kkludge_object)
 {
   //(*v).nc=0;
 }
@@ -128,7 +128,7 @@ dvariable::~dvariable() { gradfree((dlink*)v); }
    Sets Value to the argument and initializes derivative information.
    \param t constant double passed by value.
  */
-dvariable::dvariable(const double t): prevariable()
+dvariable::dvariable(const double t)
 {
   v->x = t;
   //(*v).nc=0;
@@ -141,7 +141,7 @@ dvariable::dvariable(const double t): prevariable()
    Sets value to the argument and initializes derivatve information.
    \param t constant integer passed by reference.
  */
-dvariable::dvariable(const int& t): prevariable()
+dvariable::dvariable(const int& t)
 {
   v->x = t;
   //(*v).nc=0;
