@@ -263,3 +263,40 @@ TEST_F(test_dvariable, move_assignment)
   ASSERT_EQ(value(a), value(b));
   ASSERT_TRUE(a.get_v() != b.get_v());
 }
+TEST_F(test_dvariable, assignment_double)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+
+  double b = -2.5;
+
+  a = b;
+
+  ASSERT_EQ(value(a), b);
+}
+TEST_F(test_dvariable, assignment_prevariable)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+
+  dvar_vector b("{-1, -2, -3.1, -4}");
+
+  a = b(3);
+
+  ASSERT_EQ(value(a), value(b(3)));
+  ASSERT_EQ(value(a), -3.1);
+}
+TEST_F(test_dvariable, assignment_dvariable)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+  dvariable b;
+
+  b = a;
+
+  ASSERT_EQ(value(a), value(b));
+  ASSERT_EQ(5.2, value(b));
+}

@@ -1519,20 +1519,10 @@ class dvariable:public prevariable
    dvariable(const int &t);
    dvariable(kkludge_object);
    dvariable(const prevariable &);
-   dvariable & operator=(const prevariable &);
    dvariable & operator =(const df1_one_variable & v);
    dvariable & operator =(const df1_two_variable & v);
    dvariable & operator =(const df1_three_variable & v);
-   dvariable & operator=(double);
-#if defined(USE_DDOUBLE)
-#  undef double
-   dvariable & operator=(double);
-#  define double dd_real
-#endif
    dvariable(const dvariable &);
-//#  if (__BORLANDC__  > 0x0520)
-//     dvariable& operator+=(const prevariable&);
-//#  endif
 };
 
 #if defined(max)
