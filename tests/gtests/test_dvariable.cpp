@@ -306,7 +306,9 @@ TEST_F(test_dvariable, constructor_prevariable)
 
   dvar_vector b("{-1, -2, -3.1, -4}");
 
+  size_t addresses = gradient_structure::GRAD_LIST->total_addresses();
   dvariable a(b(3));
+  ASSERT_EQ(addresses + 1, gradient_structure::GRAD_LIST->total_addresses());
 
   ASSERT_EQ(value(a), value(b(3)));
   ASSERT_EQ(value(a), -3.1);
@@ -320,4 +322,18 @@ TEST_F(test_dvariable, constructor_dvariable)
 
   ASSERT_EQ(value(a), value(b));
   ASSERT_EQ(5.2, value(b));
+}
+TEST_F(test_dvariable, prevariable_copy_constructor)
+{
+  gradient_structure gs;
+
+  dvar_vector b("{-1, -2, -3.1, -4}");
+
+  size_t addresses = gradient_structure::GRAD_LIST->total_addresses();
+  prevariable a(b(3));
+  ASSERT_EQ(addresses, gradient_structure::GRAD_LIST->total_addresses());
+
+  ASSERT_EQ(value(a), value(b(3)));
+  ASSERT_EQ(value(a), -3.1);
+  ASSERT_TRUE(a.get_v() == b(3).get_v());
 }
