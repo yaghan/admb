@@ -1313,6 +1313,7 @@ protected:
 #endif
 
 public:
+  prevariable(const prevariable&);
   double_and_int* v; ///< pointer to the data
 
    friend class dvar_vector_iterator;

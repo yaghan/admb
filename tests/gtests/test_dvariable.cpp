@@ -300,3 +300,24 @@ TEST_F(test_dvariable, assignment_dvariable)
   ASSERT_EQ(value(a), value(b));
   ASSERT_EQ(5.2, value(b));
 }
+TEST_F(test_dvariable, constructor_prevariable)
+{
+  gradient_structure gs;
+
+  dvar_vector b("{-1, -2, -3.1, -4}");
+
+  dvariable a(b(3));
+
+  ASSERT_EQ(value(a), value(b(3)));
+  ASSERT_EQ(value(a), -3.1);
+}
+TEST_F(test_dvariable, constructor_dvariable)
+{
+  gradient_structure gs;
+
+  dvariable a(5.2);
+  dvariable b(a);
+
+  ASSERT_EQ(value(a), value(b));
+  ASSERT_EQ(5.2, value(b));
+}

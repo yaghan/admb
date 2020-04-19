@@ -70,11 +70,7 @@ void gradfree(dlink* v)
   }
 }
 prevariable::prevariable(): prevariable(gradnew()) {}
-//prevariable::prevariable(const prevariable& t)
-//  {
-//     v=t.v;
-//     (*v).nc++;
-//  }
+prevariable::prevariable(const prevariable& t): prevariable(t.v) {}
 /**
   Constructor for dvariable object from its base class; deep copy.
   Allocates memory and assigns value of argument to new object.
@@ -93,11 +89,8 @@ dvariable::dvariable(const prevariable& t)
   \param t constant devariable object
  */
 dvariable::dvariable(const dvariable& t)
-{
-  v->x=t.v->x;
-  gradient_structure::GRAD_STACK1->
-    set_gradient_stack(default_evaluation1,&(v->x),&(t.v->x));
-}
+: dvariable(static_cast<const prevariable&>(t)) {}
+
 /**
 Default constructor.
 
