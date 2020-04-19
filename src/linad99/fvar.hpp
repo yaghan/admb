@@ -1314,6 +1314,7 @@ protected:
 
 public:
   prevariable(const prevariable&);
+  prevariable(prevariable&&);
   double_and_int* v; ///< pointer to the data
 
    friend class dvar_vector_iterator;
@@ -1524,7 +1525,9 @@ class dvariable:public prevariable
    dvariable & operator =(const df1_two_variable & v);
    dvariable & operator =(const df1_three_variable & v);
    dvariable(const dvariable&);
+   dvariable(dvariable&&);
    dvariable& operator=(const dvariable&);
+   dvariable& operator=(dvariable&&);
 };
 
 #if defined(max)

@@ -76,7 +76,23 @@ Assignment operator
 */
 dvariable& dvariable::operator=(const dvariable& other)
 {
-  prevariable::operator=(other);
+  if (this != &other)
+  {
+    prevariable::operator=(other);
+  }
+  return *this;
+}
+/**
+Move assignment operator
+
+@param other dvariable
+*/
+dvariable& dvariable::operator=(dvariable&& other)
+{
+  if (this != &other)
+  {
+    operator=(other);
+  }
   return *this;
 }
 
