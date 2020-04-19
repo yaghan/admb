@@ -69,6 +69,16 @@ prevariable& prevariable::operator=(const prevariable& t)
         set_gradient_stack1(default_evaluation1,&(v->x),&(t.v->x));
       return(*this);
     }
+/**
+Assignment operator
+
+@param other dvariable
+*/
+dvariable& dvariable::operator=(const dvariable& other)
+{
+  prevariable::operator=(other);
+  return *this;
+}
 
 /**
   Assigns a value to a prevariable object.

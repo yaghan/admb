@@ -1519,11 +1519,12 @@ class dvariable:public prevariable
    dvariable(double t);
    dvariable(const int &t);
    dvariable(kkludge_object);
-   dvariable(const prevariable &);
+   dvariable(const prevariable&);
    dvariable & operator =(const df1_one_variable & v);
    dvariable & operator =(const df1_two_variable & v);
    dvariable & operator =(const df1_three_variable & v);
-   dvariable(const dvariable &);
+   dvariable(const dvariable&);
+   dvariable& operator=(const dvariable&);
 };
 
 #if defined(max)
