@@ -63,12 +63,15 @@ prevariable& prevariable::operator=(const prevariable& t) const
   \return prevariable reference
  */
 prevariable& prevariable::operator=(const prevariable& t)
-    {
-      (*v).x=(*t.v).x;
-      gradient_structure::GRAD_STACK1->
-        set_gradient_stack1(default_evaluation1,&(v->x),&(t.v->x));
-      return(*this);
-    }
+{
+  if (this != &t)
+  {
+    (*v).x=(*t.v).x;
+    gradient_structure::GRAD_STACK1->
+      set_gradient_stack1(default_evaluation1, &(v->x), &(t.v->x));
+  }
+  return(*this);
+}
 /**
 Assignment operator
 
@@ -76,10 +79,17 @@ Assignment operator
 */
 dvariable& dvariable::operator=(const dvariable& other)
 {
-  if (this != &other)
-  {
-    prevariable::operator=(other);
-  }
+  prevariable::operator=(other);
+  return *this;
+}
+/**
+Assignment operator
+
+@param other prevariable
+*/
+dvariable& dvariable::operator=(const prevariable& other)
+{
+  prevariable::operator=(other);
   return *this;
 }
 /**
@@ -95,24 +105,31 @@ dvariable& dvariable::operator=(dvariable&& other)
   }
   return *this;
 }
-
 /**
   Assigns a value to a prevariable object.
   \param t constant object of type double.
   \return prevariable reference
  */
 prevariable& prevariable::operator=(const double t)
-    {
-      (*v).x=t;
-      gradient_structure::GRAD_STACK1->
-        set_gradient_stack0(df_eq_pvdoub,&(v->x));
-      return(*this);
-    }
-
+{
+  (*v).x = t;
+  gradient_structure::GRAD_STACK1->set_gradient_stack0(df_eq_pvdoub, &(v->x));
+  return *this;
+}
 /**
 Adjoint function to compute gradients for prevariable::operator=.
 */
 void df_eq_pvdoub(void)
 {
   *gradient_structure::GRAD_STACK1->ptr->dep_addr=0.;
+}
+/**
+Assigns t to dvariable.
+
+@param t double
+*/
+dvariable& dvariable::operator=(const double t)
+{
+  prevariable::operator=(t);
+  return *this;
 }

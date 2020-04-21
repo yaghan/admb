@@ -1526,8 +1526,10 @@ class dvariable:public prevariable
    dvariable & operator =(const df1_three_variable & v);
    dvariable(const dvariable&);
    dvariable(dvariable&&);
+   dvariable& operator=(const prevariable&);
    dvariable& operator=(const dvariable&);
    dvariable& operator=(dvariable&&);
+   dvariable& operator=(const double);
 };
 
 #if defined(max)
