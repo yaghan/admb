@@ -528,13 +528,19 @@ Move values from other to dvar_matrix.
 */
 dvar_matrix& dvar_matrix::operator=(dvar_matrix&& other)
 {
-  //return operator=(other);
-
   if (this != &other)
   {
-    shallow_copy(other);
-    other.allocate();
-    if (shape) --(shape->ncopies);
+    if (shape)
+    {
+      operator=(other);
+    }
+    else
+    {
+      std::swap(index_min, other.index_min);
+      std::swap(index_max, other.index_max);
+      std::swap(shape, other.shape);
+      std::swap(m, other.m);
+    }
   }
 
   return *this;

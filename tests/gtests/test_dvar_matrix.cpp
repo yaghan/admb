@@ -495,3 +495,29 @@ TEST_F(test_dvar_matrix, move_assignment)
   ASSERT_EQ(value(b(2, 2)), _a(2, 2));
   ASSERT_EQ(value(b(2, 3)), _a(2, 3));
 }
+TEST_F(test_dvar_matrix, move_assignment_different_shape)
+{
+  ad_exit=&test_ad_exit;
+
+  gradient_structure gs;
+
+  dmatrix _a(1, 2, 1, 3);
+  _a(1, 1) = 5.25;
+  _a(1, 2) = -2.33;
+  _a(1, 3) = 3.7;
+  _a(2, 1) = 2.9;
+  _a(2, 2) = 4.34;
+  _a(2, 3) = -6.3;
+
+  dvar_matrix a(_a);
+
+  ASSERT_EQ(0, a.get_ncopies());
+
+  dvar_matrix b(2, 5);;
+  size_t _total  = gradient_structure::GRAD_STACK1->total();
+  dvar_vector* a1 = &a[1];
+  ASSERT_ANY_THROW(
+    b = std::move(a);
+  );
+  ASSERT_EQ(_total, gradient_structure::GRAD_STACK1->total());
+}
