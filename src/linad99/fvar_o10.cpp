@@ -99,9 +99,21 @@ Move assignment operator
 */
 dvariable& dvariable::operator=(dvariable&& other)
 {
+  prevariable::operator=(std::move(other));
+  return *this;
+}
+prevariable& prevariable::operator=(prevariable&& other)
+{
   if (this != &other)
   {
-    operator=(other);
+    if (v)
+    {
+      operator=(other);
+    }
+    else
+    {
+      std::swap(v, other.v);
+    }
   }
   return *this;
 }

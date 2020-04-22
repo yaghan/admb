@@ -135,7 +135,7 @@ dvariable::dvariable(kkludge_object)
   //(*v).nc=0;
 }
 /** Destructor; frees memory on gradient stack.  */
-dvariable::~dvariable() { gradfree((dlink*)v); }
+dvariable::~dvariable() { if (v) gradfree((dlink*)v); }
 /**
    Creates dvariable instance from a double constant.
    Creates new dvariable object,

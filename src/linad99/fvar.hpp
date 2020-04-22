@@ -1298,23 +1298,21 @@ object is passed on the stack.
 */
 class prevariable
 {
+#ifdef __SUN__
+public:
+#else
 protected:
-#ifndef __SUN__
-  /**
-  Default constructor
-  */
-  prevariable();
-#endif
-#ifndef __NDPX__
-   prevariable(double_and_int * u)
-   {
-      v = u;
-   }
 #endif
 
+  /** Default constructor */
+  prevariable();
+
 public:
+
+  prevariable(double_and_int* u): v(u) {}
   prevariable(const prevariable&);
   prevariable(prevariable&&);
+
   double_and_int* v; ///< pointer to the data
 
    friend class dvar_vector_iterator;
@@ -1410,8 +1408,10 @@ public:
       return v;
    }
 
-   prevariable & operator=(const prevariable &);
-   prevariable & operator=(double);
+  prevariable& operator=(const prevariable&);
+  prevariable& operator=(prevariable&&);
+  prevariable& operator=(double);
+
 #if (__BORLANDC__  >= 0x0540)
    prevariable & operator=(const prevariable &) const;
    prevariable & operator=(double) const;
@@ -1437,19 +1437,6 @@ public:
    int operator>(int v1) const;
    int operator<(int v1) const;
    int operator!=(int v1) const;
-#endif
-
- public:
-#ifdef __SUN__
-   prevariable(void)
-   {
-   }
-#endif
-#ifdef __NDPX__
-   prevariable(double_and_int * u)
-   {
-      v = u;
-   }
 #endif
 
    void initialize(void);
@@ -1526,6 +1513,7 @@ class dvariable:public prevariable
    dvariable & operator =(const df1_three_variable & v);
    dvariable(const dvariable&);
    dvariable(dvariable&&);
+   dvariable(double_and_int* u): prevariable(u) {}
    dvariable& operator=(const prevariable&);
    dvariable& operator=(const dvariable&);
    dvariable& operator=(dvariable&&);
