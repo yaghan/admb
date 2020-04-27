@@ -170,7 +170,7 @@ class gradient_structure
    friend dmatrix restore_dvar_matrix_derivatives(void);
    friend dmatrix restore_dvar_matrix_value(void);
    //friend dmatrix restore_derivatives(void);
-   friend void gradfree(dlink * v);
+   friend void gradfree(double_and_int* v);
    friend double_and_int *arr_new(unsigned int sz);//js
    friend void arr_free(double_and_int *);
    friend void RETURN_ARRAYS_DECREMENT(void);

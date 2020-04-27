@@ -54,17 +54,17 @@ double_and_int* gradnew()
  * Description not yet available.
  * \param
  */
-void gradfree(dlink* v)
+void gradfree(double_and_int* v)
 {
   if (gradient_structure::GRAD_LIST)
   {
     if (gradient_structure::instances)
     {
-      gradient_structure::GRAD_LIST->append(v);
+      gradient_structure::GRAD_LIST->append((dlink*)v);
     }
     else
     {
-      delete (double_and_int*)v;
+      delete v;
       v = NULL;
     }
   }
@@ -135,7 +135,7 @@ dvariable::dvariable(kkludge_object)
   //(*v).nc=0;
 }
 /** Destructor; frees memory on gradient stack.  */
-dvariable::~dvariable() { if (v) gradfree((dlink*)v); }
+dvariable::~dvariable() { if (v) gradfree(v); }
 /**
    Creates dvariable instance from a double constant.
    Creates new dvariable object,

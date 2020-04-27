@@ -1285,8 +1285,6 @@ class indvar_offset_list
    }
 };
 
-void gradfree(dlink *);
-
 class prevariable_position;
 
 /**
@@ -1330,8 +1328,6 @@ public:
    friend double &value(const prevariable & v1);
 
    friend double *address(const prevariable & v1);
-
-   //void gradfree(dlink * v)
 
    friend prevariable & operator*(const prevariable& v1, const prevariable& v2);
 
