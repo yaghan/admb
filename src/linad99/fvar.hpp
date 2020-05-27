@@ -886,23 +886,29 @@ class indvar_offset_list;
  */
 class grad_stack_entry
 {
- public:
-   ///< Pointer to function (if any) to be used for derivative calculation
-   void (*func) (void);
-   double *dep_addr;    ///< Pointer to dependent variable
-   double *ind_addr1;   ///< Pointer to first independent variable
-   double mult1;        ///< First mutiplicand in chain rule multipication
-   double *ind_addr2;   ///< Pointer to second independent variable
-   double mult2;        ///< Second mutiplicand in chain rule multipication
- public:
-   friend void gradcalc(int nvar, const dvector & g);
-   friend void slave_gradcalc(void);
-   friend void gradloop();
-   friend void default_evaluation(void);
-   friend class grad_stack;
-   friend void gradient_structure::jacobcalc(int nvar,
-     const dmatrix & jac);
-   //friend void gradient_structure::funnel_jacobcalc(void);
+public:
+  ///< Pointer to function (if any) to be used for derivative calculation
+  void (*func)(void);
+  void (*f)(grad_stack_entry*);
+
+  double* dep_addr;    ///< Pointer to dependent variable
+  double* ind_addr1;   ///< Pointer to first independent variable
+  double  mult1;       ///< First mutiplicand in chain rule multipication
+  double* ind_addr2;   ///< Pointer to second independent variable
+  double  mult2;       ///< Second mutiplicand in chain rule multipication
+
+public:
+  grad_stack_entry()
+  {
+    func = nullptr;
+    f = nullptr;
+
+    dep_addr = nullptr;
+    ind_addr1 = nullptr;
+    mult1 = 0.0;
+    ind_addr2 = nullptr;
+    mult2 = 0.0;
+  }
 };
 void default_evaluation3ind(void);
 

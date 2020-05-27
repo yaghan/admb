@@ -157,7 +157,14 @@ void gradcalc(int nvar, const dvector& _g)
     while (gradient_structure::GRAD_STACK1->ptr-- >
              grad_ptr_first)
     {
-      (*(gradient_structure::GRAD_STACK1->ptr->func))();
+      if (gradient_structure::GRAD_STACK1->ptr->f)
+      {
+        (gradient_structure::GRAD_STACK1->ptr->f)(gradient_structure::GRAD_STACK1->ptr);
+      }
+      else
+      {
+        (*(gradient_structure::GRAD_STACK1->ptr->func))();
+      }
 /*
       icount++;
       if (icount%1000==0)
