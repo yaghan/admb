@@ -510,7 +510,16 @@ void grad_stack::set_gbuffer_pointers()
  * Description not yet available.
  * \param
  */
-void grad_stack::set_gradient_stack0(void (* func)(void),double * dep_addr)
+void grad_stack::set_gradient_stack0(
+  void (*func)(void),
+  double* dep_addr)
+{
+  set_gradient_stack0(nullptr, func, dep_addr);
+}
+void grad_stack::set_gradient_stack0(
+  void (*f)(grad_stack_entry*),
+  void (*func)(void),
+  double* dep_addr)
 {
 #ifdef NO_DERIVS
   if (!gradient_structure::no_derivatives)
@@ -522,6 +531,7 @@ void grad_stack::set_gradient_stack0(void (* func)(void),double * dep_addr)
       // and counter
       this->write_grad_stack_buffer();
     }
+    ptr->f = f;
     ptr->func = func;
     ptr->dep_addr = dep_addr;
     ptr++;
