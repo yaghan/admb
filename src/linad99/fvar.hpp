@@ -909,6 +909,10 @@ public:
     ind_addr2 = nullptr;
     mult2 = 0.0;
   }
+  void set_gradient_stack0(
+    void (*f)(grad_stack_entry*),
+    void (*func)(void),
+    double* dep_addr);
 };
 void default_evaluation3ind(void);
 

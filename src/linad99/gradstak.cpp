@@ -516,6 +516,15 @@ void grad_stack::set_gradient_stack0(
 {
   set_gradient_stack0(nullptr, func, dep_addr);
 }
+void grad_stack_entry::set_gradient_stack0(
+  void (*f)(grad_stack_entry*),
+  void (*func)(void),
+  double* dep_addr)
+{
+  this->f = f;
+  this->func = func;
+  this->dep_addr = dep_addr;
+}
 void grad_stack::set_gradient_stack0(
   void (*f)(grad_stack_entry*),
   void (*func)(void),
@@ -531,9 +540,7 @@ void grad_stack::set_gradient_stack0(
       // and counter
       this->write_grad_stack_buffer();
     }
-    ptr->f = f;
-    ptr->func = func;
-    ptr->dep_addr = dep_addr;
+    ptr->set_gradient_stack0(f, func, dep_addr);
     ptr++;
 #ifdef NO_DERIVS
   }
