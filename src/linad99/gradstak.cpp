@@ -511,6 +511,12 @@ void grad_stack::set_gbuffer_pointers()
  * \param
  */
 void grad_stack::set_gradient_stack0(
+  void (*f)(grad_stack_entry*),
+  double* dep_addr)
+{
+  set_gradient_stack0(f, nullptr, dep_addr);
+}
+void grad_stack::set_gradient_stack0(
   void (*func)(void),
   double* dep_addr)
 {
